@@ -1,4 +1,4 @@
-import { getData, getAllData } from "./database.mjs"
+import { getData, getAllData, updateData, insertData } from "./database.mjs"
 
 /**
  * @typedef {Object} user
@@ -39,7 +39,37 @@ import { getData, getAllData } from "./database.mjs"
  * @returns {Promise<user>} user data
  */
 export function getUser(valueToGet, property = "username") {
-	return getData("user", [property], [valueToGet]);
+	return getData("user", property, valueToGet);
+}
+
+export async function setUser(username, clientId, data) {
+	let { columns, values } = columnValue(data);
+	let token = await getData("token", "clientId", clientId);
+
+	if (token) {
+		return updateData("user", columns, values, ["user", "clientId"], [username, clientId]);
+	}
+	else {
+		return 
+	}
+}
+
+function columnValue(data) {
+	let columns = [];
+	let values = [];
+
+	for (let property in data) {
+		columns.push(property);
+		values.push(data[property]);
+	}
+
+	return { columns, values };
+}
+
+export async function getToken(compareValue, property = "accessToken") {
+	let data = await getData("token", property, compareValue);
+	data.client = { id: data.clientId };
+	return data;
 }
 
 /**
@@ -48,7 +78,7 @@ export function getUser(valueToGet, property = "username") {
  * @returns {Promise<quiz[]>} array of quizzes
  */
 export function getQuizzesOf(creator) {
-	return getAllData("quiz", ["creator"], [creator]);
+	return getAllData("quiz", "creator", creator);
 }
 
 /**
@@ -59,7 +89,12 @@ export function getQuizzesOf(creator) {
  */
 export async function getQuizByName(creator, quizName) {
 	let quiz = await getData("quiz", ["name", "creator"], [quizName, creator]);
-	return getFullQuiz(quiz);
+
+	if (quiz) {
+		return getFullQuiz(quiz);
+	}
+	
+	return null;
 }
 
 /**
@@ -68,7 +103,7 @@ export async function getQuizByName(creator, quizName) {
  * @returns {Promise<question[]>} array of questions
  */
 export function getQuestions(quizId) {
-	return getAllData("question", ["quizId"], [quizId]);
+	return getAllData("question", "quizId", quizId);
 }
 
 /**
@@ -77,7 +112,7 @@ export function getQuestions(quizId) {
  * @returns {fullQuiz}
  */
 async function getFullQuiz(quiz) {
-	let questions = await getAllData("question", ["quizId"], [quiz.id]);
+	let questions = await getAllData("question", "quizId", quiz.id);
 
 	return {
 		data: quiz,

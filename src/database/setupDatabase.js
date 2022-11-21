@@ -20,9 +20,9 @@ db.serialize(() => {
     )`);
 
     db.run(`CREATE TABLE token (
-        clientId TEXT PRIMARY KEY,
-        user TEXT,
-        accessToken TEXT, 
+        accessToken TEXT PRIMARY KEY
+        clientId TEXT UNIQUE,
+        user TEXT
 
         FOREIGN KEY (user) REFERENCES user (username)
     )`)
