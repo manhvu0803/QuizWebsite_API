@@ -19,6 +19,14 @@ db.serialize(() => {
         FOREIGN KEY (userGroup) REFERENCES userGroup (name)
     )`);
 
+    db.run(`CREATE TABLE token (
+        clientId TEXT PRIMARY KEY,
+        user TEXT,
+        accessToken TEXT, 
+
+        FOREIGN KEY (user) REFERENCES user (username)
+    )`)
+
     db.run(`CREATE TABLE quiz (
         id INTEGER PRIMARY KEY AUTOINCREMENT ,
         name TEXT NOT NULL,

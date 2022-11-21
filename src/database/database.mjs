@@ -2,27 +2,46 @@ import sqlite from "sqlite3";
 
 const db = new sqlite.Database("database.db");
 
-export function getData(table, columns, valuesToGet) {
-	return query(queryString(table, columns, valuesToGet));
+export function getData(table, columns, compareValues) {
+	return get(queryString(table, columns, compareValues));
 }
 
-export function getAllData(table, columns, valuesToGet) {
-	return queryAll(queryString(table, columns, valuesToGet));
+export function getAllData(table, columns, compareValues) {
+	return all(queryString(table, columns, compareValues));
 }
 
-export function queryString(table, columns, valuesToGet) {
-	let string = `SELECT * FROM ${table} WHERE ${columns[0]} = '${valuesToGet[0]}'`;
+export function insertData(table, columns, values) {
+	return run(`INSERT INTO ${table} (${columns.join(", ")}) VALUES (${values.join(", ")})`);
+}
 
-	for (let i = 1; i < columns.length; ++i) {
-		string += ` AND ${columns[i]} == '${valuesToGet[i]}'`;
+export function updateData(table, columns, values, compareColumns, compareValues) {
+	let string = `UPDATE ${table} SET ${columnValueString(columns, values, ",")}'`
+	string += ` WHERE ${columnValueString(compareColumns, compareValues)}`;
+	return run(string);
+}
+
+export function queryString(table, columns, compareValues) {
+	return `SELECT * FROM ${table} WHERE ${columnValueString(columns, compareValues)}`;
+}
+
+function columnValueString(columns, values, seperator = " AND") {
+	if (Array.isArray(columns)) {
+		let string = `${columns[0]} = '${values[0]}'`;
+	
+		for (let i = 1; i < columns.length; ++i) {
+			string += `${seperator} ${columns[i]} = '${values[i]}'`;
+		}
+
+		return string;
 	}
-
-	return string;
+	else {
+		return `${columns} = '${values}'`;
+	}
 }
 
-export function query(queryString) {
+export function get(queryString, params = []) {
 	return new Promise((resolve, reject) => {
-		db.get(queryString, (err, row) => {
+		db.get(queryString, params, (err, row) => {
 			if (err) {
 				reject(err);
 			}
@@ -33,9 +52,22 @@ export function query(queryString) {
 	})
 }
 
-export function queryAll(queryString) {
+export function all(queryString, params = []) {
 	return new Promise((resolve, reject) => {
-		db.all(queryString, (err, rows) => {
+		db.all(queryString, params, (err, rows) => {
+			if (err) {
+				reject(err);
+			}
+			else {
+				resolve(rows);
+			}
+		});
+	})
+}
+
+export function run(queryString, params = []) {
+	return new Promise((resolve, reject) => {
+		db.run(queryString, params, (err, rows) => {
 			if (err) {
 				reject(err);
 			}
