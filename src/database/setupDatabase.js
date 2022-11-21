@@ -5,26 +5,27 @@ const db = new sqlite3.Database("database.db");
 db.serialize(() => {
     db.run("PRAGMA foreign_keys = ON");
     
-    db.run(`CREATE TABLE group (
+    db.run(`CREATE TABLE userGroup (
         name TEXT PRIMARY KEY,
-        timeCreated INTEGER,
+        timeCreated INTEGER
     )`);
 
     db.run(`CREATE TABLE user (
         username TEXT PRIMARY KEY,
         password TEXT,
         email NOT NULL UNIQUE,
-        group TEXT,
+        userGroup TEXT,
 
-        FOREIGN KEY (group) REFERENCES group (name)
+        FOREIGN KEY (userGroup) REFERENCES userGroup (name)
     )`);
 
     db.run(`CREATE TABLE quiz (
+        id INTEGER PRIMARY KEY AUTOINCREMENT ,
         name TEXT NOT NULL,
         creator TEXT NOT NULL,
         timeCreated INTEGER,
 
-        PRIMARY KEY (name, creator),
+        UNIQUE (name, creator),
         FOREIGN KEY (creator) REFERENCES user (username)
     )`);
 
@@ -38,23 +39,21 @@ db.serialize(() => {
         answer3 TEXT,
 
         FOREIGN KEY (quizId) REFERENCES quiz (id)
-    )`);
+    )`, () => console.log("All table created"));
 
-    console.log("All table created");
-
-    let statement = db.prepare("INSERT INTO group VALUES (?, ?)");
+    let statement = db.prepare("INSERT INTO userGroup VALUES (?, ?)");
     statement.run(["study", Date.now() - 1000000]);
-    statement.finalize(() => console.log("Inserted into table group"));
+    statement.finalize(() => console.log("Inserted into table userGroup"));
     
     statement = db.prepare("INSERT INTO user VALUES (?, ?, ?, ?)");
     statement.run(["anon", "password1", "anonymous@gmail.com", null]);
     statement.run(["guest", "asdfghjk", "hello1123@yahoo.com", "study"]);
     statement.finalize(() => console.log("Inserted into table user"));
     
-    statement = db.prepare("INSERT INTO quiz VALUES (?, ?, ?)");
+    statement = db.prepare("INSERT INTO quiz (name, creator, timeCreated) VALUES (?, ?, ?)");
     statement.run(["Hard quiz", "anon", Date.now()]);
-    statement.run(["Easy quiz", "anon", Date.now()]);
-    statement.run(["Easy quiz", "guest", Date.now()]);
+    statement.run(["Easy quiz", "anon", Date.now() + 1000]);
+    statement.run(["Easy quiz", "guest", Date.now() - 10002]);
     statement.finalize(() => console.log("Inserted into table quiz"));
     
     statement = db.prepare("INSERT INTO question (quizId, question, correctAnswer, answer1, answer2, answer3) VALUES (?, ?, ?, ?, ?, ?)");
