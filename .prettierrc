@@ -1,0 +1,28 @@
+{
+    "printWidth": 100,
+    "tabWidth": 4,
+    "trailingComma": "none",
+    "singleQuote": false,
+    "htmlWhitespaceSensitivity": "css",
+    "endOfLine":"auto" ,
+
+  "overrides": [
+    {
+      "files": "*.css",
+      "options": {
+        "parser": "css"
+      }
+    },
+    {
+      "files": "*.scss",
+      "options": {
+        "parser": "scss"
+      }
+    }
+  ],
+  "lint-staged": {
+    "src/**/*.{js,ts,jsx,tsx}": [
+      "eslint --config ./.eslintrc.json --ext js --ext ts --ext jsx --ext tsx --fix"
+    ]
+  }
+}
