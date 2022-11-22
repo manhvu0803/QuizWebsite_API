@@ -11,7 +11,13 @@ export function getAllData(table, columns, compareValues) {
 }
 
 export function insertData(table, columns, values) {
-	return run(`INSERT INTO ${table} (${columns.join(", ")}) VALUES (${values.join(", ")})`);
+	let string = `'${values[0]}'`;
+
+	for (let i = 1; i < values.length; ++i) {
+		string += `, '${values[i]}'`;
+	}
+
+	return run(`INSERT INTO ${table} (${columns.join(", ")}) VALUES (${string})`);
 }
 
 export function deleteData(table, columns, compareValues) {

@@ -1,4 +1,4 @@
-import { getData, getAllData, updateData, insertData, deleteData } from "./database.mjs"
+import { getData, getAllData, updateData, insertData, deleteData, all } from "./database.mjs"
 
 /**
  * @typedef {Object} user
@@ -63,12 +63,16 @@ export function updateUser(username, data) {
 }
 
 export function getGroup(compareValue, property = "name") {
-	return getData("userGroup", property, compareValue);
+	return getAllData("userGroup", property, compareValue);
 }
 
-export function addGroup(data) {
-	let { columns, values } = columnValue(data);
-	return insertData("userGroup", columns, values);
+export function getGroupUserIn(username) {
+	let query = `SELECT ug.* FROM userGroup ug INNER JOIN groupMember gm ON ug.name = gm.groupName WHERE gm.user = ${username}`;
+	return all(query);
+}
+
+export function addGroup(name, creator) {
+	return insertData("userGroup", ["name", "creator", "timeCreated"], [name, creator, Date.now()]);
 }
 
 export function updateGroup(name, data) {
@@ -77,15 +81,15 @@ export function updateGroup(name, data) {
 }
 
 export function addGroupMember(group, user, isOwner = false) {
-	return insertData("groupMember", ["group", "user", "timeJoined", "isOwner"], [group, user, Date.now(), isOwner]);
+	return insertData("groupMember", ["groupName", "user", "timeJoined", "isOwner"], [group, user, Date.now(), isOwner]);
 }
 
 export function updateGroupMember(group, user, isOwner) {
-	return updateData("groupMember", ["group", "user"], [group, user], "isOwner", isOwner);
+	return updateData("groupMember", ["groupName", "user"], [group, user], "isOwner", isOwner);
 }
 
 export function removeGroupMember(group, user) {
-	return deleteData("groupMember", ["group", "user"], [group, user]);
+	return deleteData("groupMember", ["groupName", "user"], [group, user]);
 }
 
 function columnValue(data) {

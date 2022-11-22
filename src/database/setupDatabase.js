@@ -10,32 +10,30 @@ db.serialize(() => {
         creator TEXT,
         timeCreated INTEGER,
 
-        FOREIGN KEY (owner) REFERENCES user (username)
-    )`);
+        FOREIGN KEY (creator) REFERENCES user (username)
+    )`, () => console.log("Created table userGroup"));
 
     db.run(`CREATE TABLE user (
         username TEXT PRIMARY KEY,
         password TEXT,
-        email NOT NULL UNIQUE,
-
-        FOREIGN KEY (userGroup) REFERENCES userGroup (name)
+        email NOT NULL UNIQUE
     )`);
 
     db.run(`CREATE TABLE groupMember (
-        group TEXT,
+        groupName TEXT,
         user TEXT,
         timeJoined INTEGER,
         isOwner INTEGER,
 
-        PRIMARY KEY (group, member)
-        FOREIGN KEY (group) REFERENCES userGroup (name)
+        PRIMARY KEY (groupName, user)
+        FOREIGN KEY (groupName) REFERENCES userGroup (name)
         FOREIGN KEY (user) REFERENCES user (username)
     )`);
 
     db.run(`CREATE TABLE token (
-        accessToken TEXT PRIMARY KEY
+        accessToken TEXT PRIMARY KEY,
         clientId TEXT UNIQUE,
-        user TEXT
+        user TEXT,
 
         FOREIGN KEY (user) REFERENCES user (username)
     )`)
@@ -62,14 +60,14 @@ db.serialize(() => {
         FOREIGN KEY (quizId) REFERENCES quiz (id)
     )`, () => console.log("All table created"));
 
-    let statement = db.prepare("INSERT INTO userGroup VALUES (?, ?)");
-    statement.run(["study", Date.now() - 1000000]);
-    statement.finalize(() => console.log("Inserted into table userGroup"));
-    
-    statement = db.prepare("INSERT INTO user VALUES (?, ?, ?)");
+    let statement = db.prepare("INSERT INTO user VALUES (?, ?, ?)");
     statement.run(["anon", "password1", "anonymous@gmail.com"]);
     statement.run(["guest", "asdfghjk", "hello1123@yahoo.com"]);
     statement.finalize(() => console.log("Inserted into table user"));
+    
+    statement = db.prepare("INSERT INTO userGroup VALUES (?, ?, ?)");
+    statement.run(["study", "anon", Date.now() - 1000000]);
+    statement.finalize(() => console.log("Inserted into table userGroup"));
     
     statement = db.prepare("INSERT INTO quiz (name, creator, timeCreated) VALUES (?, ?, ?)");
     statement.run(["Hard quiz", "anon", Date.now()]);

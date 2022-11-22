@@ -5,44 +5,31 @@ const router = express.Router();
 
 router.get("/create", async (req, res) => {
 	let query = req.query;
-	let data = {
-		name: query.name,
-		creator: user(query) ?? query.creator,
-		timeCreated: Date.now()
-	};
-
-	let result = await run(() => db.addGroup(data));
-	res.send(result);
+	await run(res, db.addGroup(group(query) ?? query.name, user(query) ?? query.creator));
 })
 
 router.get("/addUser", async (req, res) => {
 	let query = req.query;
-	let result = await run(() => db.addGroupMember(group(query), user(query)));
-	res.send(result);
+	await run(res, db.addGroupMember(group(query), user(query)));
 })
 
 router.get("/kickUser", async (req, res) => {
 	let query = req.query;
-	let result = await run(() => db.removeGroupMember(group(query), user(query)));
-	res.send(result);
+	await run(res, db.removeGroupMember(group(query), user(query)));
 })
 
 router.get("/updateUser", async (req, res) => {
 	let query = req.query;
-	let result = await run(() => db.updateGroup(group(query), user(query), query.isOwner));
-	res.send(result);
+	await run(res, db.updateGroup(group(query), user(query), query.isOwner));
 })
 
 router.get("/createdBy", async (req, res) => {
-	let query = req.query;
-	let result = await run(() => db.getGroup(user(query), "creator"));
-	res.send(result);
+	await run(res, db.getGroup(user(req.query), "creator"));
 })
 
 router.get("/joinedBy", async (req, res) => {
 	let query = req.query;
-	let result = await run(() => db.getGroup(group(query), user(query), query.isOwner));
-	res.send(result);
+	await run(res, db.getGroup(group(query), user(query), query.isOwner));
 })
 
 router.get("/inviteUser", async (req, res) => {
@@ -57,15 +44,21 @@ function user(query) {
 	return query.user ?? query.username ?? query.userName;
 }
 
-async function run(promise) {
+async function run(res, promise) {
 	try {
-		await promise;
-		return { success: true };
+		let data = await promise;
+		res.status(200).json({ 
+			success: true,
+			data: data
+		});
 	}
 	catch (err) {
-		return { 
+		console.log(err);
+		res.status(400).json({ 
 			success: false,
-			error: err
-		};
+			error: err.toString()
+		});
 	}
 }
+
+export default router;
