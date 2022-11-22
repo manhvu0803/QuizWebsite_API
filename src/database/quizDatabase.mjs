@@ -71,8 +71,9 @@ export function getGroupUserIn(username) {
 	return all(query);
 }
 
-export function addGroup(name, creator) {
-	return insertData("userGroup", ["name", "creator", "timeCreated"], [name, creator, Date.now()]);
+export async function addGroup(name, creator) {
+	await insertData("userGroup", ["name", "creator", "timeCreated"], [name, creator, Date.now()])
+	return insertData("groupMember", ["groupName", "user", "timeJoined", "isOwner"], [name, creator, Date.now(), true]);
 }
 
 export function updateGroup(name, data) {
