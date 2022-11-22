@@ -14,6 +14,11 @@ export function insertData(table, columns, values) {
 	return run(`INSERT INTO ${table} (${columns.join(", ")}) VALUES (${values.join(", ")})`);
 }
 
+export function deleteData(table, columns, compareValues) {
+	let string = `DELETE FROM ${table} WHERE ${columnValueString(columns, compareValues)}`;
+	return run(string);
+}
+
 export function updateData(table, columns, values, compareColumns, compareValues) {
 	let string = `UPDATE ${table} SET ${columnValueString(columns, values, ",")}'`
 	string += ` WHERE ${columnValueString(compareColumns, compareValues)}`;

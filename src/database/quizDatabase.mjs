@@ -1,4 +1,4 @@
-import { getData, getAllData, updateData, insertData } from "./database.mjs"
+import { getData, getAllData, updateData, insertData, deleteData } from "./database.mjs"
 
 /**
  * @typedef {Object} user
@@ -34,24 +34,58 @@ import { getData, getAllData, updateData, insertData } from "./database.mjs"
 
 /**
  * Get user data
- * @param {*} valueToGet 
- * @param {string} property default is username
+ * @param {string} compareValue the value to check
+ * @param {"username" | "email"} column the column to check, "username" by default
  * @returns {Promise<user>} user data
  */
-export function getUser(valueToGet, property = "username") {
-	return getData("user", property, valueToGet);
+export function getUser(compareValue, column = "username") {
+	return getData("user", column, compareValue);
 }
 
-export async function setUser(username, clientId, data) {
+/**
+ * 
+ * @param {user} data 
+ * @returns 
+ */
+export function addUser(data) {
 	let { columns, values } = columnValue(data);
-	let token = await getData("token", "clientId", clientId);
+	return insertData("user", columns, values);
+}
 
-	if (token) {
-		return updateData("user", columns, values, ["user", "clientId"], [username, clientId]);
-	}
-	else {
-		return 
-	}
+/**
+ * @param {string} username
+ * @param {user} data
+ * @returns 
+ */
+export function updateUser(username, data) {
+	let { columns, values } = columnValue(data);
+	return updateData("user", columns, values, "username", username);
+}
+
+export function getGroup(compareValue, property = "name") {
+	return getData("userGroup", property, compareValue);
+}
+
+export function addGroup(data) {
+	let { columns, values } = columnValue(data);
+	return insertData("userGroup", columns, values);
+}
+
+export function updateGroup(name, data) {
+	let { columns, values } = columnValue(data);
+	return updateData("userGroup", columns, values, "name", name);
+}
+
+export function addGroupMember(group, user, isOwner = false) {
+	return insertData("groupMember", ["group", "user", "timeJoined", "isOwner"], [group, user, Date.now(), isOwner]);
+}
+
+export function updateGroupMember(group, user, isOwner) {
+	return updateData("groupMember", ["group", "user"], [group, user], "isOwner", isOwner);
+}
+
+export function removeGroupMember(group, user) {
+	return deleteData("groupMember", ["group", "user"], [group, user]);
 }
 
 function columnValue(data) {

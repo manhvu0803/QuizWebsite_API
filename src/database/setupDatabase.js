@@ -7,16 +7,29 @@ db.serialize(() => {
     
     db.run(`CREATE TABLE userGroup (
         name TEXT PRIMARY KEY,
-        timeCreated INTEGER
+        creator TEXT,
+        timeCreated INTEGER,
+
+        FOREIGN KEY (owner) REFERENCES user (username)
     )`);
 
     db.run(`CREATE TABLE user (
         username TEXT PRIMARY KEY,
         password TEXT,
         email NOT NULL UNIQUE,
-        userGroup TEXT,
 
         FOREIGN KEY (userGroup) REFERENCES userGroup (name)
+    )`);
+
+    db.run(`CREATE TABLE groupMember (
+        group TEXT,
+        user TEXT,
+        timeJoined INTEGER,
+        isOwner INTEGER,
+
+        PRIMARY KEY (group, member)
+        FOREIGN KEY (group) REFERENCES userGroup (name)
+        FOREIGN KEY (user) REFERENCES user (username)
     )`);
 
     db.run(`CREATE TABLE token (
@@ -28,7 +41,7 @@ db.serialize(() => {
     )`)
 
     db.run(`CREATE TABLE quiz (
-        id INTEGER PRIMARY KEY AUTOINCREMENT ,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         creator TEXT NOT NULL,
         timeCreated INTEGER,
@@ -53,9 +66,9 @@ db.serialize(() => {
     statement.run(["study", Date.now() - 1000000]);
     statement.finalize(() => console.log("Inserted into table userGroup"));
     
-    statement = db.prepare("INSERT INTO user VALUES (?, ?, ?, ?)");
-    statement.run(["anon", "password1", "anonymous@gmail.com", null]);
-    statement.run(["guest", "asdfghjk", "hello1123@yahoo.com", "study"]);
+    statement = db.prepare("INSERT INTO user VALUES (?, ?, ?)");
+    statement.run(["anon", "password1", "anonymous@gmail.com"]);
+    statement.run(["guest", "asdfghjk", "hello1123@yahoo.com"]);
     statement.finalize(() => console.log("Inserted into table user"));
     
     statement = db.prepare("INSERT INTO quiz (name, creator, timeCreated) VALUES (?, ?, ?)");

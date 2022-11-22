@@ -12,7 +12,6 @@ export default {
 	},
 
 	saveToken: async (token, client, user) => {
-		await db.setUser(user.username, client.id, token);
 		return token;
 	},
 
