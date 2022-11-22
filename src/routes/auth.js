@@ -1,16 +1,18 @@
 const router = require("express").Router();
 const passport = require("passport");
+const jwt = require("jsonwebtoken");
 
-router.get("login/success", (req, res) => {
+
+router.get("/login/success", (req, res) => {
     if(req.user){
-        res.status(200).json({
-            success: true,
-            message: "successfull",
-            user: req.user
-        })
-}})
+        const accessToken = jwt.sign(req.user, "jwt",
+            { expiresIn: '30d'}
+        )
+        res.status(200).json({accessToken});
+    }
+})
 
-router.get("login/failed", (req, res) => {
+router.get("/login/failed", (req, res) => {
     res.status(401).json({
         success: false,
         message: "failure"
