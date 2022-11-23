@@ -5,8 +5,10 @@ const jwt = require("jsonwebtoken");
 
 router.get("/login/success", (req, res) => {
     if(req.user){
-        const accessToken = jwt.sign(req.user, "jwt",
-            { expiresIn: '30d'}
+        const accessToken = jwt.sign(req.user, "letsplay",
+            {
+                expiresIn: '30d',
+            }
         )
         res.status(200).json({accessToken});
     }
