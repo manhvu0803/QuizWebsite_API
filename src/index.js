@@ -1,7 +1,7 @@
 const cookieSession = require("cookie-session");
 const express = require("express");
 const cors = require("cors");
-const passportSetup = require("./auth/passport");
+require("./auth/passport");
 const passport = require('passport');
 
 const authRoute = require("./routes/auth");
@@ -17,7 +17,8 @@ async function main() {
         {
             name: "session",
             keys: ["spider"],
-            maxAge: 24 * 60 * 60 * 1000 * 30
+            maxAge: 24 * 60 * 60 * 1000 * 30,
+            httpOnly: false
         }
     ))
 
