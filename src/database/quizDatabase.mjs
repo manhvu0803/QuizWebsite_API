@@ -105,10 +105,18 @@ function columnValue(data) {
 	return { columns, values };
 }
 
+export function addToken(token, clientId) {
+	return insertData("token", ["accessToken", "clientId"], [token, clientId]);
+}
+
 export async function getToken(compareValue, property = "accessToken") {
 	let data = await getData("token", property, compareValue);
 	data.client = { id: data.clientId };
 	return data;
+}
+
+export function removeToken(compareValue, property = "accessToken") {
+	return deleteData("token", property, compareValue);
 }
 
 /**
