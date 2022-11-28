@@ -109,8 +109,23 @@ router.post("/login", (req, res) => {
         password: req.body.password
     }
     console.log(user);
+    res.status(201).json({
+        message: "Login was successful",
+        user: {
+            token: jwt.sign({
+                firstName: "ten_test",
+                lastName: "ho_test",
+                picture: "url_test",
+                email: "emal_test"}, process.env.JWT_SECRET, {
+            expiresIn: "1d",
+        }),
+    }});
+
 })
 
+router.post("/signup", (req, res) => {
+
+})
 
 
 module.exports = router
