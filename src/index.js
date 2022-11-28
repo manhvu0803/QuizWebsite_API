@@ -8,6 +8,7 @@ const authRoute = require("./routes/auth");
 
 async function main() {
     const groupRoute = await import("./routes/group.mjs");
+    const userRoute = await import("./routes/user.mjs");
 
     const app = express();
 
@@ -34,6 +35,7 @@ async function main() {
 
     app.use("/auth", authRoute);
     app.use("/group", groupRoute.default);
+    app.use("/user", userRoute.default);
 
     app.listen("5000", () => {
         console.log("Server is running!")

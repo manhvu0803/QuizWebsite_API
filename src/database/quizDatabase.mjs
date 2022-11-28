@@ -105,13 +105,12 @@ function columnValue(data) {
 	return { columns, values };
 }
 
-export function addToken(token, clientId) {
-	return insertData("token", ["accessToken", "clientId"], [token, clientId]);
+export function addToken(token, clientId, username) {
+	return insertData("token", ["accessToken", "clientId", "username"], [token, clientId, username]);
 }
 
 export async function getToken(compareValue, property = "accessToken") {
 	let data = await getData("token", property, compareValue);
-	data.client = { id: data.clientId };
 	return data;
 }
 

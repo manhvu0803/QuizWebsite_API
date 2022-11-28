@@ -6,6 +6,10 @@ export function getUsername(query) {
 	return query.user ?? query.username ?? query.userName;
 }
 
+export function getClientId(query) {
+	return query.clientId ?? query.clientid ?? query.clientID;
+}
+
 export async function run(res, promise) {
 	try {
 		let data = await promise;
@@ -23,7 +27,7 @@ export function sendData(res, data) {
     });
 }
 
-export function error(res, err) {
+export function sendError(res, err) {
     console.log("Request error:");
     console.log(err);
     res.status(400).json({ 
