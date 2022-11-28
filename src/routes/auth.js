@@ -103,6 +103,14 @@ router.get("/logout", (req, res) => {
     res.redirect("http://localhost:3000/")
 })
 
+router.post("/login", (req, res) => {
+    const user = {
+        username: req.body.username,
+        password: req.body.password
+    }
+    console.log(user);
+})
+
 
 
 module.exports = router
