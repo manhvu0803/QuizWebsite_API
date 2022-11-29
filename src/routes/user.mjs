@@ -3,6 +3,8 @@ import * as db from "../database/quizDatabase.mjs";
 import jwt from "jsonwebtoken";
 import "dotenv/config"
 import { getClientId, getUsername, sendData, sendError } from "./routeUtils.mjs"
+import { sendConfirmationEmail } from "../mailer.js";
+
 
 const router = express.Router();
 
@@ -42,6 +44,8 @@ router.get("/register", async (req, res) => {
         }
 
         await db.addToken(token, clientId, username);
+
+        await sendConfirmationEmail({toUser: {email: query.email, username: username}, hash: token});
 
         sendData(res, { token });
     }
