@@ -13,15 +13,15 @@ router.get("/register", async (req, res) => {
     if (user) {
         error = "Username has been used";
     }
-    ror = null;
+    error = null;
     
     user = await db.getUser(query.email, "email");
     if (user) {
-        error = "Username has been used";
+        error = "Email has been used";
     }
 
     if (error) {
-        sendError(res, err);
+        sendError(res, error);
         return;
     }
 
@@ -32,8 +32,14 @@ router.get("/register", async (req, res) => {
             password: query.password 
         });
 
-        let token = random();
-        await db.addToken(token, getClientId(query), username);
+        let clientId = getClientId(query);
+        let token = await db.getToken(clientId, "clientId");
+
+        if (!token) {
+            token = random();
+        }
+        
+        await db.addToken(token, clientId, username);
 
         sendData(res, { token });
     }

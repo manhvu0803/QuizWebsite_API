@@ -69,6 +69,11 @@ db.serialize(() => {
     statement.run(["study", "anon", Date.now() - 1000000]);
     statement.finalize(() => console.log("Inserted into table userGroup"));
     
+    statement = db.prepare("INSERT INTO groupMember VALUES (?, ?, ?, ?)");
+    statement.run(["study", "anon", Date.now() - 1000000, true]);
+    statement.run(["study", "guest", Date.now() - 1000000, false]);
+    statement.finalize(() => console.log("Inserted into table userGroup"));
+    
     statement = db.prepare("INSERT INTO quiz (name, creator, timeCreated) VALUES (?, ?, ?)");
     statement.run(["Hard quiz", "anon", Date.now()]);
     statement.run(["Easy quiz", "anon", Date.now() + 1000]);

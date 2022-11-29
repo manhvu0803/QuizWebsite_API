@@ -63,7 +63,15 @@ export function updateUser(username, data) {
 }
 
 export function getGroup(compareValue, property = "name") {
-	return getAllData("userGroup", property, compareValue);
+	return getData("userGroup", property, compareValue);
+}
+
+export function getGroupMembers(groupName) {
+	let query = `SELECT gm.timeJoined, gm.isOwner, user.username, user.email FROM 
+					groupMember gm INNER JOIN user ON gm.user = user.username
+					WHERE gm.groupName = '${groupName}'`;
+
+	return all(query);
 }
 
 export function getGroupUserIn(username) {
@@ -106,9 +114,15 @@ function columnValue(data) {
 }
 
 export function addToken(token, clientId, username) {
-	return insertData("token", ["accessToken", "clientId", "username"], [token, clientId, username]);
+	return insertData("token", ["accessToken", "clientId", "user"], [token, clientId, username]);
 }
 
+/**
+ * 
+ * @param {*} compareValue 
+ * @param {"accessToken" | "clientId" | "user"} property 
+ * @returns 
+ */
 export async function getToken(compareValue, property = "accessToken") {
 	let data = await getData("token", property, compareValue);
 	return data;

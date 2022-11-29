@@ -28,7 +28,7 @@ export function sendData(res, data) {
 }
 
 export function sendError(res, err) {
-    console.log("Request error:");
+    console.trace("Request error:");
     console.log(err);
     res.status(400).json({ 
         success: false,
