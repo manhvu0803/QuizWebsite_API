@@ -1,7 +1,7 @@
 import express from "express";
 import * as db from "../database/quizDatabase.mjs";
-const jwt = require("jsonwebtoken");
-require("dotenv/config")
+import jwt from "jsonwebtoken";
+import "dotenv/config"
 import { getClientId, getUsername, sendData, sendError } from "./routeUtils.mjs"
 
 const router = express.Router();
@@ -65,7 +65,7 @@ router.get("/login", async (req, res) => {
         user = await db.getUser(tokenInfo.user);
 
         if (user) {
-            sendData(res, {accessToken:random(), token: jwt.sign({ email: user?.email }, process.env.JWT_SECRET, {
+            sendData(res, {accessToken: jwt.sign({ name: user?.username, avatar:"" }, process.env.JWT_SECRET, {
                 expiresIn: "1d",
             })});
             return;
@@ -109,7 +109,7 @@ router.get("/login", async (req, res) => {
         await db.addToken(token.accessToken, clientId, username);
     }
 
-    sendData(res, {accessToken: random(), token: jwt.sign({ email: user?.email }, process.env.JWT_SECRET, {
+    sendData(res, {accessToken: jwt.sign({ name: user?.username, avatar:"" }, process.env.JWT_SECRET, {
         expiresIn: "1d",
     }) });
 });
