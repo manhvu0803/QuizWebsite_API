@@ -5,6 +5,9 @@ import { getData, getAllData, updateData, insertData, deleteData, all } from "./
  * @property {string} username
  * @property {string} password
  * @property {string} email
+ * @property {string} displayName
+ * @property {number} age
+ * @property {string} avatarUrl
  */
 
 /**
@@ -67,7 +70,7 @@ export function getGroup(compareValue, property = "name") {
 }
 
 export function getGroupMembers(groupName) {
-	let query = `SELECT gm.timeJoined, gm.isOwner, user.username, user.email FROM 
+	let query = `SELECT gm.timeJoined, gm.isOwner, user.username, user.email, user.displayName FROM 
 					groupMember gm INNER JOIN user ON gm.user = user.username
 					WHERE gm.groupName = '${groupName}'`;
 

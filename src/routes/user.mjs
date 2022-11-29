@@ -65,9 +65,18 @@ router.get("/login", async (req, res) => {
         user = await db.getUser(tokenInfo.user);
 
         if (user) {
-            sendData(res, {accessToken: jwt.sign({ name: user?.username, avatar:"" }, process.env.JWT_SECRET, {
-                expiresIn: "1d",
-            })});
+            sendData(res, { 
+                accessToken: jwt.sign({ 
+                        username: user.username,
+                        email: user.email,
+                        displayName: user.displayName,
+                        age: user.age,
+                        avatarUrl: user.avatarUrl
+                    }, 
+                    process.env.JWT_SECRET, 
+                    { expiresIn: "1d" }
+                )
+            });
             return;
         }
     }
@@ -113,5 +122,9 @@ router.get("/login", async (req, res) => {
         expiresIn: "1d",
     }) });
 });
+
+router.get("/edit", (req, res) => {
+
+})
 
 export default router;
