@@ -46,7 +46,7 @@ router.get("/createdBy", async (req, res) => {
 
 router.get("/joinedBy", async (req, res) => {
 	let query = req.query;
-	await run(res, db.getGroup(getGroup(query), getUsername(query), query.isOwner));
+	await run(res, db.getGroupUserIn(getUsername(query)));
 })
 
 router.get("/inviteUser", async (req, res) => {
