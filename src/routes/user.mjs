@@ -1,5 +1,7 @@
 import express from "express";
 import * as db from "../database/quizDatabase.mjs";
+const jwt = require("jsonwebtoken");
+require("dotenv/config")
 import { getClientId, getUsername, sendData, sendError } from "./routeUtils.mjs"
 
 const router = express.Router();
@@ -14,7 +16,7 @@ router.get("/register", async (req, res) => {
         error = "Username has been used";
     }
     error = null;
-    
+
     user = await db.getUser(query.email, "email");
     if (user) {
         error = "Email has been used";
@@ -26,10 +28,10 @@ router.get("/register", async (req, res) => {
     }
 
     try {
-        await db.addUser({ 
-            email: query.email, 
-            username: username, 
-            password: query.password 
+        await db.addUser({
+            email: query.email,
+            username: username,
+            password: query.password
         });
 
         let clientId = getClientId(query);
@@ -38,7 +40,7 @@ router.get("/register", async (req, res) => {
         if (!token) {
             token = random();
         }
-        
+
         await db.addToken(token, clientId, username);
 
         sendData(res, { token });
@@ -63,7 +65,9 @@ router.get("/login", async (req, res) => {
         user = await db.getUser(tokenInfo.user);
 
         if (user) {
-            sendData(res, { user, token: tokenInfo });
+            sendData(res, {accessToken:random(), token: jwt.sign({ email: user?.email }, process.env.JWT_SECRET, {
+                expiresIn: "1d",
+            })});
             return;
         }
     }
@@ -81,7 +85,7 @@ router.get("/login", async (req, res) => {
         sendError(res, "User doesn't exist");
         return;
     }
-    
+
     if (user.password != query.password) {
         sendError(res, "Wrong password");
         return;
@@ -104,8 +108,10 @@ router.get("/login", async (req, res) => {
 
         await db.addToken(token.accessToken, clientId, username);
     }
-    
-    sendData(res, { user, token });
+
+    sendData(res, {accessToken: random(), token: jwt.sign({ email: user?.email }, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+    }) });
 });
 
 export default router;
