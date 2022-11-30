@@ -2,7 +2,7 @@ import express from "express";
 import * as db from "../database/quizDatabase.mjs";
 import jwt from "jsonwebtoken";
 import "dotenv/config"
-import { getClientId, getUsername, sendData, sendError } from "./routeUtils.mjs"
+import { getClientId, getUsername, sendData, sendError, run, getAvatarUrl } from "./routeUtils.mjs"
 import { sendConfirmationEmail } from "../mailer.js";
 
 
@@ -128,7 +128,16 @@ router.get("/login", async (req, res) => {
 });
 
 router.get("/edit", (req, res) => {
+    let query = req.query;
 
+    let data = {
+        displayName: query.displayName,
+        age: query.age,
+        email: query.email,
+        avatarUrl: getAvatarUrl(query)
+    }
+
+    run(res, db.updateUser(query.username, data));
 })
 
 export default router;

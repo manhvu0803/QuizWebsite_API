@@ -69,6 +69,10 @@ export function getGroup(compareValue, property = "name") {
 	return getData("userGroup", property, compareValue);
 }
 
+export function getAllGroup(compareValue, property = "name") {
+	return getAllData("userGroup", property, compareValue);
+}
+
 /**
  * 
  * @param {*} groupName 
@@ -82,7 +86,7 @@ export function getGroupMembers(groupName) {
 	return all(query);
 }
 
-export function getGroupUserIn(username) {
+export function getGroupsUserIn(username) {
 	let query = `SELECT ug.* FROM userGroup ug INNER JOIN groupMember gm ON ug.name = gm.groupName WHERE gm.user = ${username}`;
 	return all(query);
 }
@@ -114,8 +118,10 @@ function columnValue(data) {
 	let values = [];
 
 	for (let property in data) {
-		columns.push(property);
-		values.push(data[property]);
+		if (data[property] !== undefined) {
+			columns.push(property);
+			values.push(data[property]);
+		}
 	}
 
 	return { columns, values };

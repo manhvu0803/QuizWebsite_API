@@ -6,13 +6,13 @@ const router = express.Router();
 
 router.get("/create", async (req, res) => {
 	let query = req.query;
+	
 	let group = await db.getGroup(getGroup(query));
-
 	if (group) {
 		sendError(res, "Group already exists");
 		return;
 	}
-	
+
 	await run(res, db.addGroup(getGroup(query) ?? query.name, getUsername(query) ?? query.creator));
 })
 
@@ -56,12 +56,12 @@ router.get("/updateUser", async (req, res) => {
 })
 
 router.get("/createdBy", async (req, res) => {
-	await run(res, db.getGroup(getUsername(req.query), "creator"));
+	await run(res, db.getAllGroup(getUsername(req.query), "creator"));
 })
 
 router.get("/joinedBy", async (req, res) => {
 	let query = req.query;
-	await run(res, db.getGroupUserIn(getUsername(query)));
+	await run(res, db.getGroupsUserIn(getUsername(query)));
 })
 
 export default router;

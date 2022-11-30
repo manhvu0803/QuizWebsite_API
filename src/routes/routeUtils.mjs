@@ -10,6 +10,10 @@ export function getClientId(query) {
 	return query.clientId ?? query.clientid ?? query.clientID;
 }
 
+export function getAvatarUrl(query) {
+	return query.avatar ?? query.avatrUrl ?? query.avatarURL ?? query.avatarurl;
+}
+
 export async function run(res, promise) {
 	try {
 		let data = await promise;
