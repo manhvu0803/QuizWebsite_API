@@ -26,8 +26,9 @@ export function deleteData(table, columns, compareValues) {
 }
 
 export function updateData(table, columns, values, compareColumns, compareValues) {
-	let string = `UPDATE ${table} SET ${columnValueString(columns, values, ",")}'`
+	let string = `UPDATE ${table} SET ${columnValueString(columns, values, ",")}`
 	string += ` WHERE ${columnValueString(compareColumns, compareValues)}`;
+	console.log(string);
 	return run(string);
 }
 

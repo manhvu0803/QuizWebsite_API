@@ -6,6 +6,10 @@ export function getUsername(query) {
 	return query.user ?? query.username ?? query.userName;
 }
 
+export function getDisplayName(query) {
+	return query.displayName ?? query.displayname;
+}
+
 export function getClientId(query) {
 	return query.clientId ?? query.clientid ?? query.clientID;
 }

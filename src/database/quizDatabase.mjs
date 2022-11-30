@@ -93,7 +93,7 @@ export function getGroupsUserIn(username) {
 
 export async function addGroup(name, creator) {
 	await insertData("userGroup", ["name", "creator", "timeCreated"], [name, creator, Date.now()])
-	return insertData("groupMember", ["groupName", "user", "timeJoined", "isOwner"], [name, creator, Date.now(), true]);
+	return insertData("groupMember", ["groupName", "user", "timeJoined", "role"], [name, creator, Date.now(), 1]);
 }
 
 export function updateGroup(name, data) {
@@ -101,12 +101,12 @@ export function updateGroup(name, data) {
 	return updateData("userGroup", columns, values, "name", name);
 }
 
-export function addGroupMember(group, user, isOwner = false) {
-	return insertData("groupMember", ["groupName", "user", "timeJoined", "isOwner"], [group, user, Date.now(), isOwner]);
+export function addGroupMember(group, user, role = 3) {
+	return insertData("groupMember", ["groupName", "user", "timeJoined", "role"], [group, user, Date.now(), role]);
 }
 
-export function updateGroupMember(group, user, isOwner) {
-	return updateData("groupMember", ["groupName", "user"], [group, user], "isOwner", isOwner);
+export function updateGroupMember(group, user, role) {
+	return updateData("groupMember", ["groupName", "user"], [group, user], "role", role);
 }
 
 export function removeGroupMember(group, user) {
