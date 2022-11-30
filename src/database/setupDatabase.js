@@ -19,14 +19,15 @@ db.serialize(() => {
         email TEXT NOT NULL UNIQUE,
         displayName TEXT,
         age INTEGER,
-        avatarUrl TEXT
+        avatarUrl TEXT,
+        active INTEGER
     )`);
 
     db.run(`CREATE TABLE groupMember (
         groupName TEXT,
         user TEXT,
         timeJoined INTEGER,
-        isOwner INTEGER,
+        role INTEGER,
 
         PRIMARY KEY (groupName, user)
         FOREIGN KEY (groupName) REFERENCES userGroup (name)
@@ -63,10 +64,10 @@ db.serialize(() => {
         FOREIGN KEY (quizId) REFERENCES quiz (id)
     )`, () => console.log("All table created"));
 
-    let statement = db.prepare("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?)");
-    statement.run(["anon", "password1", "anonymous@gmail.com", "Teacher Huy", 30, ""]);
-    statement.run(["guest", "asdfghjk", "hello1123@yahoo.com", "Guest account", 15, ""]);
-    statement.run(["mniit2", "12345678", "ilou@yahoo.com", "Tran Huy", 15, ""]);
+    let statement = db.prepare("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)");
+    statement.run(["anon", "password1", "anonymous@gmail.com", "Teacher Huy", 30, "", true]);
+    statement.run(["guest", "asdfghjk", "hello1123@yahoo.com", "Guest account", 15, "", true]);
+    statement.run(["mniit2", "12345678", "ilou@yahoo.com", "Tran Huy", 15, "", true]);
     statement.finalize(() => console.log("Inserted into table user"));
     
     statement = db.prepare("INSERT INTO userGroup VALUES (?, ?, ?)");
@@ -74,8 +75,8 @@ db.serialize(() => {
     statement.finalize(() => console.log("Inserted into table userGroup"));
     
     statement = db.prepare("INSERT INTO groupMember VALUES (?, ?, ?, ?)");
-    statement.run(["study", "anon", Date.now() - 1000000, true]);
-    statement.run(["study", "guest", Date.now() - 1000000, false]);
+    statement.run(["study", "anon", Date.now() - 1000000, 1]);
+    statement.run(["study", "guest", Date.now() - 1000000, 3]);
     statement.finalize(() => console.log("Inserted into table groupMember"));
     
     statement = db.prepare("INSERT INTO quiz (name, creator, timeCreated) VALUES (?, ?, ?)");
