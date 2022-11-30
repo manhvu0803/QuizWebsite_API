@@ -27,7 +27,6 @@ exports.sendConfirmationEmail = function({toUser, hash}) {
 
         transporter.sendMail(message, function(err, info){
 
-            console.log(process.env.GooglePassword);
             if(err){
                 rej(err)
             }
