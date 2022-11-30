@@ -33,7 +33,8 @@ router.get("/register", async (req, res) => {
         await db.addUser({
             email: query.email,
             username: username,
-            password: query.password
+            password: query.password,
+            active: 0
         });
 
         let clientId = getClientId(query);
@@ -68,19 +69,28 @@ router.get("/login", async (req, res) => {
         let tokenInfo = await db.getToken(token);
         user = await db.getUser(tokenInfo.user);
 
-        if (user) {
-            sendData(res, { 
-                accessToken: jwt.sign({ 
+        console.log(user);
+
+        if (user && user.active === 1) {
+            sendData(res, {
+                accessToken: jwt.sign({
                         username: user.username,
                         email: user.email,
                         displayName: user.displayName,
                         age: user.age,
                         avatarUrl: user.avatarUrl
-                    }, 
-                    process.env.JWT_SECRET, 
+                    },
+                    process.env.JWT_SECRET,
                     { expiresIn: "1d" }
                 )
             });
+            return;
+        }
+        else if (user){
+            res.status(400).json({
+                success: false,
+                isActive: false
+            })
             return;
         }
     }
@@ -96,6 +106,14 @@ router.get("/login", async (req, res) => {
 
     if (!user) {
         sendError(res, "User doesn't exist");
+        return;
+    }
+
+    if(user.active === 0){
+        res.status(400).json({
+            success: false,
+            isActive: false
+        })
         return;
     }
 
@@ -138,6 +156,12 @@ router.get("/edit", (req, res) => {
     }
 
     run(res, db.updateUser(query.username, data));
+})
+
+router.get("/active", async (req, res) => {
+    let query = req.query;
+
+    run(res, db.updateUser(query.username, {active: 1}));
 })
 
 export default router;
