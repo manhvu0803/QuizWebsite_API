@@ -69,6 +69,11 @@ export function getGroup(compareValue, property = "name") {
 	return getData("userGroup", property, compareValue);
 }
 
+/**
+ * 
+ * @param {*} groupName 
+ * @returns {Promise<user[]>}
+ */
 export function getGroupMembers(groupName) {
 	let query = `SELECT gm.timeJoined, gm.isOwner, user.username, user.email, user.displayName FROM 
 					groupMember gm INNER JOIN user ON gm.user = user.username
