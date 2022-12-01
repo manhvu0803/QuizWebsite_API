@@ -79,7 +79,21 @@ router.get("/createdBy", async (req, res) => {
 
 router.get("/joinedBy", async (req, res) => {
 	let query = req.query;
-	await run(res, db.getGroupsUserIn(getUsername(query)));
+
+	let groups = db.getGroupsUserIn(getUsername(query));
+
+	try {
+		for (let group of groups) {
+			group.creator = await db.getUser(group.creator);
+			delete group.creator.password;
+			delete group.creator.username;
+		}
+
+		sendData(res, groups);
+	}
+	catch (error) {
+		sendError(res, error);
+	}
 })
 
 router.get("/invite", async (req, res) => {
@@ -118,8 +132,6 @@ router.get("/invite", async (req, res) => {
 	catch (err) {
 		sendError(res, err);
 	}
-
-
 
 	await run(res, db.getGroupsUserIn(getUsername(query)));
 })
