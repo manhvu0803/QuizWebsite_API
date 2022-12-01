@@ -65,6 +65,13 @@ router.get("/login", async (req, res) => {
 
     let user = null;
 
+    let clientId = getClientId(query);
+
+    if (!clientId) {
+        sendError(res, "No client ID");
+        return;
+    }
+
     if (token) {
         let tokenInfo = await db.getToken(token);
         user = await db.getUser(tokenInfo.user);
@@ -78,7 +85,8 @@ router.get("/login", async (req, res) => {
                         email: user.email,
                         displayName: user.displayName,
                         age: user.age,
-                        avatarUrl: user.avatarUrl
+                        avatarUrl: user.avatarUrl,
+                        clientId: clientId
                     },
                     process.env.JWT_SECRET,
                     { expiresIn: "1d" }
@@ -122,13 +130,6 @@ router.get("/login", async (req, res) => {
         return;
     }
 
-    let clientId = getClientId(query);
-
-    if (!clientId) {
-        sendError(res, "No client ID");
-        return;
-    }
-
     token = await db.getToken(getClientId(query), "clientId");
 
     if (!token) {
@@ -140,7 +141,7 @@ router.get("/login", async (req, res) => {
         await db.addToken(token.accessToken, clientId, username);
     }
 
-    sendData(res, {accessToken: jwt.sign({ name: user?.username, avatar:"" }, process.env.JWT_SECRET, {
+    sendData(res, {accessToken: jwt.sign({ name: user?.username, avatar:"", clientId: clientId }, process.env.JWT_SECRET, {
         expiresIn: "1d",
     }) });
 });
@@ -173,7 +174,34 @@ router.get("/edit", (req, res) => {
 router.get("/active", async (req, res) => {
     let query = req.query;
 
+    let user = null;
+    let username = getUsername(query);
+    if (username) {
+        user = await db.getUser(username);
+    }
+    else{
+        sendError(res, "Cannot activate!");
+        return;
+    }
+
     run(res, db.updateUser(query.username, {active: 1}));
+
+    sendData(res, "Activated!");
+})
+
+router.get("/logout", async (req, res) => {
+    let query = req.query;
+
+    let clientId = getClientId(query);
+
+    if (!clientId) {
+        sendError(res, "No client ID");
+        return;
+    }
+
+    await db.removeToken(clientId, "clientId");
+
+    sendData(res, "Success");
 })
 
 export default router;
