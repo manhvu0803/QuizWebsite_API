@@ -1,12 +1,13 @@
 import express from "express";
 import * as db from "../database/quizDatabase.mjs";
 import { getGroup, getUsername, run, sendData, sendError } from "./routeUtils.mjs"
+import { sendInviteEmail } from "../mailer.js";
 
 const router = express.Router();
 
 router.get("/create", async (req, res) => {
 	let query = req.query;
-	
+
 	let group = await db.getGroup(getGroup(query));
 	if (group) {
 		sendError(res, "Group already exists");
@@ -34,10 +35,10 @@ router.get("/get", async (req, res) => {
 	let query = req.query;
 	let groupName = getGroup(query);
 
-	try {	
+	try {
 		let group = await db.getGroup(groupName);
 		group.members = await db.getGroupMembers(group.name);
-		
+
 		sendData(res, group);
 	}
 	catch (err) {
@@ -61,6 +62,47 @@ router.get("/createdBy", async (req, res) => {
 
 router.get("/joinedBy", async (req, res) => {
 	let query = req.query;
+	await run(res, db.getGroupsUserIn(getUsername(query)));
+})
+
+router.get("/invite", async (req, res) => {
+	let query = req.query;
+
+	let sender = query.sender;
+	let reciver = query.reciver;
+	let groupName = getGroup(query);
+
+	if(!sender && !reciver && !groupName){
+		sendError(res, "Missing data!");
+        return;
+	}
+
+	let user = await db.getUser(reciver);
+
+	if(!user){
+		sendError(res, "User doesn't exist!");
+        return;
+	}
+
+	try {
+		let members = await db.getGroupMembers(groupName);
+
+		if(members.find(({username}) => username === reciver) !== undefined){
+			sendError(res, "User joined group!");
+			return;
+		}
+
+		await sendInviteEmail({toUser: {email: user.email, username: user.username}, inviter: sender, groupname: groupName});
+
+		sendData(res, "Invitation send!");
+
+	}
+	catch (err) {
+		sendError(res, err);
+	}
+
+
+
 	await run(res, db.getGroupsUserIn(getUsername(query)));
 })
 
