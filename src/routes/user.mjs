@@ -185,8 +185,6 @@ router.get("/active", async (req, res) => {
     }
 
     run(res, db.updateUser(query.username, {active: 1}));
-
-    sendData(res, "Activated!");
 })
 
 router.get("/logout", async (req, res) => {
