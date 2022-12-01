@@ -9,6 +9,7 @@ db.serialize(() => {
         name TEXT PRIMARY KEY,
         creator TEXT,
         timeCreated INTEGER,
+        inviteId TEXT UNIQUE,
 
         FOREIGN KEY (creator) REFERENCES user (username)
     )`, () => console.log("Created table userGroup"));
@@ -29,8 +30,8 @@ db.serialize(() => {
         timeJoined INTEGER,
         role INTEGER,
 
-        PRIMARY KEY (groupName, user)
-        FOREIGN KEY (groupName) REFERENCES userGroup (name)
+        PRIMARY KEY (groupName, user),
+        FOREIGN KEY (groupName) REFERENCES userGroup (name),
         FOREIGN KEY (user) REFERENCES user (username)
     )`);
 
@@ -71,7 +72,7 @@ db.serialize(() => {
     statement.finalize(() => console.log("Inserted into table user"));
     
     statement = db.prepare("INSERT INTO userGroup VALUES (?, ?, ?)");
-    statement.run(["study", "anon", Date.now() - 1000000]);
+    statement.run(["study", "anon", Date.now() - 1000000, "8126797812647916"]);
     statement.finalize(() => console.log("Inserted into table userGroup"));
     
     statement = db.prepare("INSERT INTO groupMember VALUES (?, ?, ?, ?)");

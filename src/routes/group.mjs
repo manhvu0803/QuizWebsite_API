@@ -1,6 +1,6 @@
 import express from "express";
 import * as db from "../database/quizDatabase.mjs";
-import { getGroup, getUsername, run, sendData, sendError } from "./routeUtils.mjs"
+import { getGroup, getInviteId, getUsername, run, sendData, sendError } from "./routeUtils.mjs"
 import { sendInviteEmail } from "../mailer.js";
 
 const router = express.Router();
@@ -19,7 +19,15 @@ router.get("/create", async (req, res) => {
 
 router.get("/addUser", async (req, res) => {
 	let query = req.query;
-	let groupMembers = await db.getGroupMembers(getGroup(query));
+
+	let group = await db.getGroup(getInviteId(query), "inviteId");
+
+	if (!group) {
+		sendError(res, "Group doesn't exist");
+		return;
+	}
+
+	let groupMembers = await db.getGroupMembers(group.name);
 
 	for (let member of groupMembers) {
 		if (member.username == getUsername(query) || member.email == query.email) {

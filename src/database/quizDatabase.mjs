@@ -1,4 +1,5 @@
 import { getData, getAllData, updateData, insertData, deleteData, all } from "./database.mjs"
+import { v4 as uuid } from "uuid"
 
 /**
  * @typedef {Object} user
@@ -92,7 +93,7 @@ export function getGroupsUserIn(username) {
 }
 
 export async function addGroup(name, creator) {
-	await insertData("userGroup", ["name", "creator", "timeCreated"], [name, creator, Date.now()])
+	await insertData("userGroup", ["name", "creator", "timeCreated", "inviteId"], [name, creator, Date.now(), uuid()])
 	return insertData("groupMember", ["groupName", "user", "timeJoined", "role"], [name, creator, Date.now(), 1]);
 }
 

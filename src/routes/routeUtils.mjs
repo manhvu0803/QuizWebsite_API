@@ -18,6 +18,10 @@ export function getAvatarUrl(query) {
 	return query.avatar ?? query.avatrUrl ?? query.avatarURL ?? query.avatarurl;
 }
 
+export function getInviteId(query) {
+	return query.inviteId ?? query.inviteid ?? query.inviteID;
+}
+
 export async function run(res, promise) {
 	try {
 		let data = await promise;
