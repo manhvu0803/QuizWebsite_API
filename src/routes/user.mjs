@@ -117,16 +117,16 @@ router.get("/login", async (req, res) => {
         return;
     }
 
+    if (user.password != query.password) {
+        sendError(res, "Wrong password");
+        return;
+    }
+
     if(user.active === 0){
         res.status(400).json({
             success: false,
             isActive: false
         })
-        return;
-    }
-
-    if (user.password != query.password) {
-        sendError(res, "Wrong password");
         return;
     }
 
@@ -184,7 +184,19 @@ router.get("/active", async (req, res) => {
         return;
     }
 
-    run(res, db.updateUser(query.username, {active: 1}));
+    if(!user){
+        sendError(res, "Error!");
+        return;
+    }
+
+    try {
+		await db.updateUser(query.username, {active: 1})
+        sendData(res, "Activated");
+	}
+	catch (err) {
+        sendError(res, err);
+	}
+
 })
 
 router.get("/logout", async (req, res) => {
