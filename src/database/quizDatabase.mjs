@@ -102,16 +102,16 @@ export function updateGroup(name, data) {
 	return updateData("userGroup", columns, values, "name", name);
 }
 
-export function addGroupMember(group, user, role = 3) {
-	return insertData("groupMember", ["groupName", "user", "timeJoined", "role"], [group, user, Date.now(), role]);
+export function addGroupMember(groupName, username, role = 3) {
+	return insertData("groupMember", ["groupName", "user", "timeJoined", "role"], [groupName, username, Date.now(), role]);
 }
 
-export function updateGroupMember(group, user, role) {
-	return updateData("groupMember", ["groupName", "user"], [group, user], "role", role);
+export function updateGroupMember(groupName, username, role) {
+	return updateData("groupMember", ["groupName", "user"], [groupName, username], "role", role);
 }
 
-export function removeGroupMember(group, user) {
-	return deleteData("groupMember", ["groupName", "user"], [group, user]);
+export function removeGroupMember(groupName, username) {
+	return deleteData("groupMember", ["groupName", "user"], [groupName, username]);
 }
 
 function columnValue(data) {

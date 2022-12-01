@@ -23,20 +23,27 @@ router.get("/addUser", async (req, res) => {
 	let group = await db.getGroup(getInviteId(query), "inviteId");
 
 	if (!group) {
-		sendError(res, "Group doesn't exist");
+		sendError(res, "Inivte ID doesn't exist");
 		return;
 	}
 
 	let groupMembers = await db.getGroupMembers(group.name);
 
+	let currentUsername = getUsername(query);
 	for (let member of groupMembers) {
-		if (member.username == getUsername(query) || member.email == query.email) {
+		if (member.username == currentUsername || member.email == query.email) {
 			sendError(res, "User is already in group");
 			return;
 		}
 	}
 
-	sendData(res, "");
+	try {
+		await db.addGroupMember(group.name, currentUsername);
+		sendData(res, group);
+	}
+	catch (error) {
+		sendError(res, error);
+	}
 })
 
 router.get("/get", async (req, res) => {
@@ -45,6 +52,8 @@ router.get("/get", async (req, res) => {
 
 	try {
 		let group = await db.getGroup(groupName);
+		group.creator = await db.getUser(group.creator);
+		delete group.creator.password;
 		group.members = await db.getGroupMembers(group.name);
 
 		sendData(res, group);
@@ -61,7 +70,7 @@ router.get("/kickUser", async (req, res) => {
 
 router.get("/updateUser", async (req, res) => {
 	let query = req.query;
-	await run(res, db.updateGroup(getGroup(query), getUsername(query), query.isOwner));
+	await run(res, db.updateGroupMember(getGroup(query), getUsername(query), query.role));
 })
 
 router.get("/createdBy", async (req, res) => {

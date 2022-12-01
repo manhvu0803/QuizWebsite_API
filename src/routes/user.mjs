@@ -34,6 +34,9 @@ router.get("/register", async (req, res) => {
             email: query.email,
             username: username,
             password: query.password,
+            displayName: getDisplayName(query),
+            age: query.age,
+            avatarUrl: getAvatarUrl(query),
             active: 0
         });
 
