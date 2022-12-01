@@ -74,7 +74,17 @@ router.get("/updateUser", async (req, res) => {
 })
 
 router.get("/createdBy", async (req, res) => {
-	await run(res, db.getAllGroup(getUsername(req.query), "creator"));
+	try {
+		let groups = await db.getAllGroup(getUsername(req.query), "creator");
+		let creator = await db.getUser(group.creator);
+		delete creator.password;
+		delete creator.username;
+
+		sendData(res, { creator, groups });
+	}
+	catch (error) {
+		sendError(res, error);
+	}
 })
 
 router.get("/joinedBy", async (req, res) => {
