@@ -71,7 +71,7 @@ db.serialize(() => {
     statement.run(["mniit2", "12345678", "ilou@yahoo.com", "Tran Huy", 15, "", true]);
     statement.finalize(() => console.log("Inserted into table user"));
     
-    statement = db.prepare("INSERT INTO userGroup VALUES (?, ?, ?)");
+    statement = db.prepare("INSERT INTO userGroup VALUES (?, ?, ?, ?)");
     statement.run(["study", "anon", Date.now() - 1000000, "8126797812647916"]);
     statement.finalize(() => console.log("Inserted into table userGroup"));
     
