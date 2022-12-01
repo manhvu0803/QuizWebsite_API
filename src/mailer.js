@@ -38,7 +38,7 @@ exports.sendConfirmationEmail = function({toUser, hash}) {
     })
 }
 
-exports.sendInviteEmail = function({toUser, inviter, groupname}) {
+exports.sendInviteEmail = function({toUser, inviter, groupname, inviteId}) {
     return new Promise((res, rej) => {
 
         const message = {
@@ -48,7 +48,7 @@ exports.sendInviteEmail = function({toUser, inviter, groupname}) {
             html: `
                 <h3> Hello ${toUser.username}</h3>
                 <p> ${inviter} invite you to join group: ${groupname} </p>
-                <p> To join, please follow this link: <a target="_" href="https://lets-play.vercel.app/invite/${groupname}">${groupname}</a> </p>
+                <p> To join, please follow this link: <a target="_" href="https://lets-play.vercel.app/invite/${inviteId}">${groupname}</a> </p>
                 <p>Let's play</p>
             `
         }

@@ -40,8 +40,6 @@ app.post("/secret", async (req, res) => {
 		res.send(result);
 	}
 	catch (err) {
-		// console.log("Error " + err);
-		// res.send(err);
 		throw err;
 	}
 });
