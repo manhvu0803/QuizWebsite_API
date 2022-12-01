@@ -88,7 +88,7 @@ export function getGroupMembers(groupName) {
 }
 
 export function getGroupsUserIn(username) {
-	let query = `SELECT ug.* FROM userGroup ug INNER JOIN groupMember gm ON ug.name = gm.groupName WHERE gm.user = ${username}`;
+	let query = `SELECT ug.* FROM userGroup ug INNER JOIN groupMember gm ON ug.name = gm.groupName WHERE gm.user = '${username}'`;
 	return all(query);
 }
 
