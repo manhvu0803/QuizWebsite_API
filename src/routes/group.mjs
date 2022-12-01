@@ -76,9 +76,12 @@ router.get("/updateUser", async (req, res) => {
 router.get("/createdBy", async (req, res) => {
 	try {
 		let groups = await db.getAllGroup(getUsername(req.query), "creator");
-		let creator = await db.getUser(group.creator);
-		delete creator.password;
-		delete creator.username;
+		let creator = null;
+        if (groups.length > 0) {
+            creator = await db.getUser(groups[0].creator);
+            delete creator.password;
+            delete creator.username;
+        }
 
 		sendData(res, { creator, groups });
 	}
@@ -90,13 +93,12 @@ router.get("/createdBy", async (req, res) => {
 router.get("/joinedBy", async (req, res) => {
 	let query = req.query;
 
-	let groups = db.getGroupsUserIn(getUsername(query));
+	let groups = await db.getGroupsUserIn(getUsername(query));
 
 	try {
 		for (let group of groups) {
 			group.creator = await db.getUser(group.creator);
 			delete group.creator.password;
-			delete group.creator.username;
 		}
 
 		sendData(res, groups);
@@ -110,16 +112,16 @@ router.get("/invite", async (req, res) => {
 	let query = req.query;
 
 	let sender = query.sender;
-	let reciver = query.reciver;
+	let receiver = query.receiver;
 	let inviteId = query.inviteId;
 	let groupName = getGroup(query);
 
-	if(!sender && !reciver && !groupName){
+	if(!sender && !receiver && !groupName){
 		sendError(res, "Missing data!");
         return;
 	}
 
-	let user = await db.getUser(reciver);
+	let user = await db.getUser(receiver);
 
 	if(!user){
 		sendError(res, "User doesn't exist!");
@@ -129,7 +131,7 @@ router.get("/invite", async (req, res) => {
 	try {
 		let members = await db.getGroupMembers(groupName);
 
-		if(members.find(({username}) => username === reciver) !== undefined){
+		if(members.find(({username}) => username === receiver) !== undefined){
 			sendError(res, "User joined group!");
 			return;
 		}
@@ -141,9 +143,8 @@ router.get("/invite", async (req, res) => {
 	}
 	catch (err) {
 		sendError(res, err);
+		return;
 	}
-
-	await run(res, db.getGroupsUserIn(getUsername(query)));
 })
 
 export default router;
