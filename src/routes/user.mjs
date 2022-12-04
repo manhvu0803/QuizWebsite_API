@@ -1,5 +1,5 @@
 import express from "express";
-import * as db from "../database/quizDatabase.mjs";
+import * as db from "../database/userDatabase.mjs";
 import jwt from "jsonwebtoken";
 import "dotenv/config"
 import { getClientId, getUsername, sendData, sendError, run, getAvatarUrl, getDisplayName } from "./routeUtils.mjs"

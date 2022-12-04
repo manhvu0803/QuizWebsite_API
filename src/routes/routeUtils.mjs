@@ -33,17 +33,11 @@ export async function run(res, promise) {
 }
 
 export function sendData(res, data) {
-    res.status(200).json({ 
-        success: true,
-        data: data
-    });
+    res.status(200).json(data);
 }
 
-export function sendError(res, err) {
+export function sendError(res, error) {
     console.trace("Request error:");
-    console.log(err);
-    res.status(400).json({ 
-        success: false,
-        error: err.toString()
-    });
+    console.log(error);
+    res.status(400).json({ error });
 }
