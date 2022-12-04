@@ -8,9 +8,6 @@ const jwtOptions = {
 };
 require("dotenv/config");
 
-
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
-
 passport.use(new JwtStrategy(jwtOptions,  function(jwt_payload, done) {
     done(null, jwt_payload);
 }));

@@ -147,4 +147,9 @@ router.get("/invite", async (req, res) => {
 	}
 })
 
+router.get("/test", (req, res) => {
+    console.log(req.user);
+    res.status(200).json(req.user);
+})
+
 export default router;
