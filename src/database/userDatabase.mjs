@@ -27,7 +27,7 @@ import { v4 as uuid } from "uuid";
  * @returns 
  */
 export function addUser(data) {
-	let { columns, values } = columnValue(data);
+	let { columns, values } = db.columnValue(data);
 	return db.insertData("user", columns, values);
 }
 
@@ -37,7 +37,7 @@ export function addUser(data) {
  * @returns {Promise<void>}
  */
 export function updateUser(username, data) {
-	let { columns, values } = columnValue(data);
+	let { columns, values } = db.columnValue(data);
 	return db.updateData("user", columns, values, "username", username);
 }
 

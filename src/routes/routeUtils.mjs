@@ -39,5 +39,5 @@ export function sendData(res, data) {
 export function sendError(res, error) {
     console.trace("Request error:");
     console.log(error);
-    res.status(400).json({ error });
+    res.status(400).json({ error: `${error}` });
 }
