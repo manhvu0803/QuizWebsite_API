@@ -1,16 +1,4 @@
-import { getData, getAllData, updateData, insertData, deleteData, all } from "./database.mjs"
-import { v4 as uuid } from "uuid"
-
-/**
- * @typedef {Object} user
- * @property {string} username
- * @property {string} password
- * @property {string} email
- * @property {string} displayName
- * @property {number} age
- * @property {string} avatarUrl
- */
-
+import { getData, getAllData } from "./database.mjs"
 /**
  * @typedef {Object} question
  * @property {number} id
@@ -37,117 +25,6 @@ import { v4 as uuid } from "uuid"
  */
 
 /**
- * Get user data
- * @param {string} compareValue the value to check
- * @param {"username" | "email"} column the column to check, "username" by default
- * @returns {Promise<user>} user data
- */
-export function getUser(compareValue, column = "username") {
-	return getData("user", column, compareValue);
-}
-
-/**
- * 
- * @param {user} data 
- * @returns 
- */
-export function addUser(data) {
-	let { columns, values } = columnValue(data);
-	return insertData("user", columns, values);
-}
-
-/**
- * @param {string} username
- * @param {user} data
- * @returns 
- */
-export function updateUser(username, data) {
-	let { columns, values } = columnValue(data);
-	return updateData("user", columns, values, "username", username);
-}
-
-export function getGroup(compareValue, property = "name") {
-	return getData("userGroup", property, compareValue);
-}
-
-export function getAllGroup(compareValue, property = "name") {
-	return getAllData("userGroup", property, compareValue);
-}
-
-/**
- * 
- * @param {*} groupName 
- * @returns {Promise<user[]>}
- */
-export function getGroupMembers(groupName) {
-	let query = `SELECT gm.timeJoined, gm.role, user.username, user.email, user.displayName FROM 
-					groupMember gm INNER JOIN user ON gm.user = user.username
-					WHERE gm.groupName = '${groupName}'`;
-
-	return all(query);
-}
-
-export function getGroupsUserIn(username) {
-	let query = `SELECT ug.* FROM userGroup ug INNER JOIN groupMember gm ON ug.name = gm.groupName WHERE gm.user = '${username}'`;
-	return all(query);
-}
-
-export async function addGroup(name, creator) {
-	await insertData("userGroup", ["name", "creator", "timeCreated", "inviteId"], [name, creator, Date.now(), uuid()])
-	return insertData("groupMember", ["groupName", "user", "timeJoined", "role"], [name, creator, Date.now(), 1]);
-}
-
-export function updateGroup(name, data) {
-	let { columns, values } = columnValue(data);
-	return updateData("userGroup", columns, values, "name", name);
-}
-
-export function addGroupMember(groupName, username, role = 3) {
-	return insertData("groupMember", ["groupName", "user", "timeJoined", "role"], [groupName, username, Date.now(), role]);
-}
-
-export function updateGroupMember(groupName, username, role) {
-	return updateData("groupMember", ["groupName", "user"], [groupName, username], "role", role);
-}
-
-export function removeGroupMember(groupName, username) {
-	return deleteData("groupMember", ["groupName", "user"], [groupName, username]);
-}
-
-function columnValue(data) {
-	let columns = [];
-	let values = [];
-
-	for (let property in data) {
-		if (data[property] !== undefined) {
-			columns.push(property);
-			values.push(data[property]);
-		}
-	}
-
-	return { columns, values };
-}
-
-export function addToken(token, clientId, username) {
-	return insertData("token", ["accessToken", "clientId", "user"], [token, clientId, username]);
-}
-
-/**
- * 
- * @param {*} compareValue 
- * @param {"accessToken" | "clientId" | "user"} property 
- * @returns 
- */
-export async function getToken(compareValue, property = "accessToken") {
-	let data = await getData("token", property, compareValue);
-	return data;
-}
-
-export function removeToken(compareValue, property = "accessToken") {
-	return deleteData("token", property, compareValue);
-}
-
-/**
  * Get all the quizzes of a user
  * @param {string} creator creator username
  * @returns {Promise<quiz[]>} array of quizzes
@@ -158,8 +35,8 @@ export function getQuizzesOf(creator) {
 
 /**
  * Get a quiz from its name and creator
- * @param {*} creator creator username
- * @param {*} quizName name of the quiz
+ * @param {string} creator creator username
+ * @param {string} quizName name of the quiz
  * @returns {Promise<fullQuiz>} full quiz data and its questions
  */
 export async function getQuizByName(creator, quizName) {

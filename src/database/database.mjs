@@ -37,6 +37,20 @@ export function queryString(table, columns, compareValues) {
 	return `SELECT * FROM ${table} WHERE ${columnValueString(columns, compareValues)}`;
 }
 
+export function columnValue(data) {
+	let columns = [];
+	let values = [];
+
+	for (let property in data) {
+		if (data[property] !== undefined) {
+			columns.push(property);
+			values.push(data[property]);
+		}
+	}
+
+	return { columns, values };
+}
+
 function columnValueString(columns, values, seperator = " AND") {
 	if (Array.isArray(columns)) {
 		let string = `${columns[0]} = '${values[0]}'`;

@@ -1,6 +1,6 @@
 import express from "express";
-import * as db from "../database/quizDatabase.mjs";
-import { getGroup, getInviteId, getUsername, run, sendData, sendError } from "./routeUtils.mjs"
+import * as db from "../database/userDatabase.mjs";
+import { getGroupName, getInviteId, getUsername, run, sendData, sendError } from "./routeUtils.mjs"
 import { sendInviteEmail } from "../mailer.js";
 
 const router = express.Router();
@@ -8,13 +8,13 @@ const router = express.Router();
 router.get("/create", async (req, res) => {
 	let query = req.query;
 
-	let group = await db.getGroup(getGroup(query));
+	let group = await db.getGroup(getGroupName(query));
 	if (group) {
 		sendError(res, "Group already exists");
 		return;
 	}
 
-	await run(res, db.addGroup(getGroup(query) ?? query.name, getUsername(query) ?? query.creator));
+	await run(res, db.addGroup(getGroupName(query) ?? query.name, getUsername(query) ?? query.creator));
 })
 
 router.get("/addUser", async (req, res) => {
@@ -48,7 +48,7 @@ router.get("/addUser", async (req, res) => {
 
 router.get("/get", async (req, res) => {
 	let query = req.query;
-	let groupName = getGroup(query);
+	let groupName = getGroupName(query);
 
 	try {
 		let group = await db.getGroup(groupName);
@@ -65,12 +65,12 @@ router.get("/get", async (req, res) => {
 
 router.get("/kickUser", async (req, res) => {
 	let query = req.query;
-	await run(res, db.removeGroupMember(getGroup(query), getUsername(query)));
+	await run(res, db.removeGroupMember(getGroupName(query), getUsername(query)));
 })
 
 router.get("/updateUser", async (req, res) => {
 	let query = req.query;
-	await run(res, db.updateGroupMember(getGroup(query), getUsername(query), query.role));
+	await run(res, db.updateGroupMember(getGroupName(query), getUsername(query), query.role));
 })
 
 router.get("/createdBy", async (req, res) => {
@@ -114,7 +114,7 @@ router.get("/invite", async (req, res) => {
 	let sender = query.sender;
 	let receiver = query.receiver;
 	let inviteId = query.inviteId;
-	let groupName = getGroup(query);
+	let groupName = getGroupName(query);
 
 	if(!sender && !receiver && !groupName){
 		sendError(res, "Missing data!");

@@ -1,4 +1,4 @@
-export function getGroup(query) {
+export function getGroupName(query) {
 	return query.group ?? query.groupname ?? query.groupName;
 }
 
