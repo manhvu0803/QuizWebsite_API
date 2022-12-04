@@ -2,6 +2,16 @@ const sqlite3 = require("sqlite3").verbose();
 
 const db = new sqlite3.Database("database.db");
 
+function log(err, data)
+{
+    if (err) {
+        console.log(err);
+    }
+    else {
+        console.log(data);
+    }
+}
+
 db.serialize(() => {
     db.run("PRAGMA foreign_keys = ON");
     
@@ -12,7 +22,7 @@ db.serialize(() => {
         inviteId TEXT UNIQUE,
 
         FOREIGN KEY (creator) REFERENCES user (username)
-    )`, () => console.log("Created table userGroup"));
+    )`, (err) => log(err, "Created table userGroup"));
 
     db.run(`CREATE TABLE user (
         username TEXT PRIMARY KEY,
@@ -22,7 +32,7 @@ db.serialize(() => {
         age INTEGER,
         avatarUrl TEXT,
         active INTEGER
-    )`);
+    )`, log);
 
     db.run(`CREATE TABLE groupMember (
         groupName TEXT,
@@ -33,7 +43,7 @@ db.serialize(() => {
         PRIMARY KEY (groupName, user),
         FOREIGN KEY (groupName) REFERENCES userGroup (name),
         FOREIGN KEY (user) REFERENCES user (username)
-    )`);
+    )`, log);
 
     db.run(`CREATE TABLE token (
         accessToken TEXT PRIMARY KEY,
@@ -41,7 +51,7 @@ db.serialize(() => {
         user TEXT,
 
         FOREIGN KEY (user) REFERENCES user (username)
-    )`)
+    )`, log)
 
     db.run(`CREATE TABLE quiz (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,19 +61,35 @@ db.serialize(() => {
 
         UNIQUE (name, creator),
         FOREIGN KEY (creator) REFERENCES user (username)
-    )`);
+    )`, log);
 
     db.run(`CREATE TABLE question (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         quizId INTEGER,
         question TEXT,
-        correctAnswer TEXT,
-        answer1 TEXT,
-        answer2 TEXT,
-        answer3 TEXT,
 
         FOREIGN KEY (quizId) REFERENCES quiz (id)
-    )`, () => console.log("All table created"));
+    )`, log);
+
+    db.run(`CREATE TABLE answer (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        questionId INTEGER,
+        answerText TEXT,
+        isCorrect INTEGER,
+
+        FOREIGN KEY (questionId) REFERENCES question (id)
+    )`, log);
+
+    db.run(`CREATE TABLE userAnswer (
+        questionId INTEGER,
+        user TEXT,
+        answerId INTEGER,
+
+        FOREIGN KEY (questionId) REFERENCES question (id),
+        FOREIGN KEY (user) REFERENCES user (username),
+        FOREIGN KEY (answerId) REFERENCES answer (answerId),
+        PRIMARY KEY (questionId, user)
+    )`, log);
 
     let statement = db.prepare("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)");
     statement.run(["anon", "password1", "anonymous@gmail.com", "Teacher Huy", 30, "", true]);
@@ -86,10 +112,22 @@ db.serialize(() => {
     statement.run(["Easy quiz", "guest", Date.now() - 10002]);
     statement.finalize(() => console.log("Inserted into table quiz"));
     
-    statement = db.prepare("INSERT INTO question (quizId, question, correctAnswer, answer1, answer2, answer3) VALUES (?, ?, ?, ?, ?, ?)");
-    statement.run([1, "1 + 1 = ?", "2", "||", "10", "two"]);
-    statement.run([1, "Why?", "Help", "Eh", "", ""]);
+    statement = db.prepare("INSERT INTO question (quizId, question) VALUES (?, ?)");
+    statement.run([1, "1 + 1 = ?"]);
+    statement.run([1, "Why?"]);
     statement.finalize(() => console.log("Inserted into table question"));
+    
+    statement = db.prepare("INSERT INTO answer (questionId, answerText, isCorrect) VALUES (?, ?, ?)");
+    statement.run([1, "2", true]);
+    statement.run([1, "10", false]);
+    statement.run([1, "II", false]);
+    statement.run([1, "11", false]);
+    
+    statement.run([2, "Cause", false]);
+    statement.run([2, "Hello", true]);
+    statement.run([2, "Eh", false]);
+    statement.run([2, "IDK", false]);
+    statement.finalize(() => console.log("Inserted into table answer"))
 });
 
 db.close();

@@ -1,6 +1,7 @@
 import sqlite from "sqlite3";
 
 const db = new sqlite.Database("database.db");
+db.run("PRAGMA foreign_keys = ON", () => console.log("Database is ready"));
 
 export function getData(table, columns, compareValues) {
 	return get(queryString(table, columns, compareValues));
