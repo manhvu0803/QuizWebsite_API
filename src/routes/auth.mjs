@@ -24,45 +24,43 @@ async function verifyGoogleToken(token) {
     }
 }
 
-router.post("/signup/google", async (req, res) => {
-    try {
-        // console.log({ verified: verifyGoogleToken(req.body.credential) });
-        if (req.body.credential) {
-            const verificationResponse = await verifyGoogleToken(req.body.credential);
+// router.post("/signup/google", async (req, res) => {
+//     try {
+//         // console.log({ verified: verifyGoogleToken(req.body.credential) });
+//         if (req.body.credential) {
+//             const verificationResponse = await verifyGoogleToken(req.body.credential);
 
-            if (verificationResponse.error) {
-            return res.status(400).json({
-                message: verificationResponse.error,
-            });
-        }
+//             if (verificationResponse.error) {
+//             return res.status(400).json({
+//                 message: verificationResponse.error,
+//             });
+//         }
 
-        const profile = verificationResponse?.payload;
+//         const profile = verificationResponse?.payload;
 
-        DB.push(profile);
+//         DB.push(profile);
 
-        res.status(201).json({
-            message: "Signup was successful",
-            user: {
-            firstName: profile?.given_name,
-            lastName: profile?.family_name,
-            picture: profile?.picture,
-            email: profile?.email,
-            token: jwt.sign({ email: profile?.email }, "myScret", {
-                expiresIn: "1d",
-            }),
-            },
-        });
-        }
-    } catch (error) {
-        res.status(500).json({
-        message: "An error occured. Registration failed.",
-        });
-    }
-})
+//         res.status(201).json({
+//             message: "Signup was successful",
+//             user: {
+//             firstName: profile?.given_name,
+//             lastName: profile?.family_name,
+//             picture: profile?.picture,
+//             email: profile?.email,
+//             token: jwt.sign({ email: profile?.email }, "myScret", {
+//                 expiresIn: "1d",
+//             }),
+//             },
+//         });
+//         }
+//     } catch (error) {
+//         res.status(500).json({
+//         message: "An error occured. Registration failed.",
+//         });
+//     }
+// })
 
 router.post("/login/google", async (req, res) => {
-    console.log(req);
-
     try {
         if (req.body.credential) {
             const verificationResponse = await verifyGoogleToken(req.body.credential);
@@ -74,26 +72,60 @@ router.post("/login/google", async (req, res) => {
 
         const profile = verificationResponse?.payload;
 
-        const existsInDB = DB.find((person) => person?.email === profile?.email);
+        const user = await db.getUser(profile.sub);
 
-        if (!existsInDB) {
-            return res.status(400).json({
-            message: "You are not registered. Please sign up",
-            });
+        let clientId = req.body.clientId;
+
+        if (!user) {
+            try {
+                await db.addUser({
+                    email: profile.email,
+                    username: profile.sub,
+                    password: '123',
+                    displayName: profile.name,
+                    age: null,
+                    avatarUrl: profile.picture,
+                    active: profile.email_verified ? 1 : 0
+                });
+
+                let token = await db.getToken(clientId, "clientId");
+
+                if (!token) {
+                    token = random();
+                }
+
+                await db.addToken(token, clientId, profile.sub);
+            }
+            catch (err) {
+                sendError(res, err);
+                return;
+            }
         }
 
-        res.status(201).json({
-            message: "Login was successful",
-            user: {
-                firstName: profile?.given_name,
-                lastName: profile?.family_name,
-                picture: profile?.picture,
-                email: profile?.email,
-                token: jwt.sign({ email: profile?.email }, process.env.JWT_SECRET, {
-                expiresIn: "1d",
-            }),
-        },
-    });
+        if(profile.email_verified)
+            sendData(res, {
+                accessToken: jwt.sign({
+                        name: profile.sub,
+                        email: profile.email,
+                        displayName: profile.name,
+                        age: null,
+                        avatar: profile.picture,
+                        clientId: clientId
+                    },
+                    process.env.JWT_SECRET,
+                    { expiresIn: "1d" }
+                )
+            });
+            return;
+            }
+        else{
+            await sendConfirmationEmail({toUser: {email: query.email, username: username}, hash: token});
+
+            res.status(400).json({
+                success: false,
+                isActive: false
+            })
+            return;
         }
     } catch (error) {
         res.status(500).json({
@@ -178,11 +210,11 @@ router.get("/login", async (req, res) => {
         if (user && user.active === 1) {
             sendData(res, {
                 accessToken: jwt.sign({
-                        username: user.username,
+                        name: user.username,
                         email: user.email,
                         displayName: user.displayName,
                         age: user.age,
-                        avatarUrl: user.avatarUrl,
+                        avatar: user.avatarUrl,
                         clientId: clientId
                     },
                     process.env.JWT_SECRET,
