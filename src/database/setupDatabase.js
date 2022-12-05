@@ -81,7 +81,7 @@ db.serialize(() => {
     )`, log);
 
     db.run(`CREATE TABLE userAnswer (
-        questionId INTEGER,
+        slideId INTEGER,
         user TEXT,
         answerId INTEGER,
 
@@ -106,18 +106,18 @@ db.serialize(() => {
     statement.run(["study", "guest", Date.now() - 1000000, 3]);
     statement.finalize(() => console.log("Inserted into table groupMember"));
     
-    statement = db.prepare("INSERT INTO quiz (name, creator, timeCreated) VALUES (?, ?, ?)");
+    statement = db.prepare("INSERT INTO presentation (name, creator, timeCreated) VALUES (?, ?, ?)");
     statement.run(["Hard quiz", "anon", Date.now()]);
     statement.run(["Easy quiz", "anon", Date.now() + 1000]);
     statement.run(["Easy quiz", "guest", Date.now() - 10002]);
-    statement.finalize(() => console.log("Inserted into table quiz"));
+    statement.finalize(() => console.log("Inserted into table presentation"));
     
-    statement = db.prepare("INSERT INTO question (quizId, question) VALUES (?, ?)");
+    statement = db.prepare("INSERT INTO slide (presentationId, question) VALUES (?, ?)");
     statement.run([1, "1 + 1 = ?"]);
     statement.run([1, "Why?"]);
-    statement.finalize(() => console.log("Inserted into table question"));
+    statement.finalize(() => console.log("Inserted into table slide"));
     
-    statement = db.prepare("INSERT INTO answer (questionId, answerText, isCorrect) VALUES (?, ?, ?)");
+    statement = db.prepare("INSERT INTO answer (slideId, answerText, isCorrect) VALUES (?, ?, ?)");
     statement.run([1, "2", true]);
     statement.run([1, "10", false]);
     statement.run([1, "II", false]);

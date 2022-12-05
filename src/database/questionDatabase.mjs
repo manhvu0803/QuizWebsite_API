@@ -28,14 +28,17 @@ export function getPresentationsOf(creator) {
 	return db.getAllData("presentation", "creator", creator);
 }
 
-export function createPresentation(data) {
-	let { columns, values } = db.columnValue(data);
-	return db.insertData("presentation", columns, values);
+export function getPresentation(id) {
+	return db.getAllData("presentation", "id", id);
 }
 
-export function updatePresentation(data) {
+export function addPresentation(name, creator) {
+	return db.insertData("presentation", ["name", "creator", "timeCreated"], [name, creator, Date.now()]);
+}
+
+export function updatePresentation(id, data) {
 	let { columns, values } = db.columnValue(data);
-	return db.insertData("presentation", columns, values);
+	return db.updateData("presentation", "id", id, columns, values);
 }
 
 /**
@@ -43,23 +46,23 @@ export function updatePresentation(data) {
  * @param {string} presentationId presentation ID
  * @returns {Promise<slide[]>} array of slides
  */
-export function getAllSlides(presentationId) {
+export function getSlidesOf(presentationId) {
 	return db.getAllData("slide", "presentationId", presentationId);
 }
 
-export function getSlide(slideId) {
-	return db.getData("slide", "slideId", slideId);
+export function getSlide(id) {
+	return db.getData("slide", "id", id);
 }
 
-export function createSlide(presentationId, question) {
+export function addSlide(presentationId, question) {
 	return db.insertData("slide", ["presentationId", "question"], [presentationId, question]);
 }
 
-export function updateSlide(slideId, question) {
-	return db.updateData("slide", "question", question, "slideId", slideId);
+export function updateSlide(id, question) {
+	return db.updateData("slide", "question", question, "id", id);
 }
 
-export function getAllAnswers(slideId) {
+export function getAnswersOF(slideId) {
 	return db.getAllData("answer", "slideId", slideId);
 }
 
@@ -67,6 +70,6 @@ export function addAnswer(slideId, answerText, isCorrect) {
 	return db.insertData("slide", ["slideId", "answerText", "isCorrect"], [slideId, answerText, isCorrect]);
 }
 
-export function updateSlide(slideId, question) {
-	return db.updateData("slide", "question", question, "slideId", slideId);
+export function updateAnswer(id, answerText) {
+	return db.updateData("answer", "answerText", answerText, "id", id);
 }

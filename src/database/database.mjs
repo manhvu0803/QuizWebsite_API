@@ -93,12 +93,12 @@ export function all(queryString, params = []) {
 
 export function run(queryString, params = []) {
 	return new Promise((resolve, reject) => {
-		db.run(queryString, params, (err, rows) => {
+		db.run(queryString, params, function (err) {
 			if (err) {
 				reject(err);
 			}
 			else {
-				resolve(rows);
+				resolve(this);
 			}
 		});
 	})

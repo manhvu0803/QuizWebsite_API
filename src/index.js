@@ -9,6 +9,7 @@ async function main() {
     const groupRoute = await import("./routes/group.mjs");
     const userRoute = await import("./routes/user.mjs");
     const authRoute = await import("./routes/auth.mjs");
+    const presentationRoute = await import("./routes/presentation.mjs");
 
     const app = express();
 
@@ -38,6 +39,7 @@ async function main() {
     app.use("/auth", authRoute.default);
     app.use("/group", passport.authenticate("jwt", {session: false}), groupRoute.default);
     app.use("/user", passport.authenticate("jwt", {session: false}), userRoute.default);
+    app.use("/presentation", passport.authenticate("jwt", {session: false}), presentationRoute.default);
 
     app.listen("5000", () => {
         console.log("Server is running!")
