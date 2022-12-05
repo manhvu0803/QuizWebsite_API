@@ -41,6 +41,13 @@ router.get("/logout", async (req, res) => {
         return;
     }
 
+    let token = await db.getToken(req.user.username, "user");
+
+    if (clientId != token.clientId) {
+        sendError(res, "User isn't logged in on this client");
+        return;
+    }
+    
     await db.removeToken(clientId, "clientId");
 
     sendData(res, "Success");

@@ -12,6 +12,13 @@ import { v4 as uuid } from "uuid";
  */
 
 /**
+ * @typedef {Object} token
+ * @property {string} accessToken
+ * @property {string} user
+ * @property {string} clientId
+ */
+
+/**
  * Get user data
  * @param {string} compareValue the value to check
  * @param {"username" | "email"} column the column to check, "username" by default
@@ -50,9 +57,8 @@ export function getAllGroup(compareValue, property = "name") {
 }
 
 /**
- * 
  * @param {string} groupName 
- * @returns {Promise<user[]>}
+ * @returns {Promise<>}
  */
 export function getGroupMembers(groupName) {
 	let query = `SELECT gm.timeJoined, gm.role, user.username, user.email, user.displayName 
@@ -94,9 +100,9 @@ export function addToken(token, clientId, username) {
 }
 
 /**
- * 
  * @param {string} compareValue 
  * @param {"accessToken" | "clientId" | "user"} property
+ * @return {Promise<token>}
  */
 export function getToken(compareValue, property = "accessToken") {
 	return db.getData("token", property, compareValue);

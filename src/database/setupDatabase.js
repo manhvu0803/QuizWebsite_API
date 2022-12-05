@@ -53,7 +53,7 @@ db.serialize(() => {
         FOREIGN KEY (user) REFERENCES user (username)
     )`, log)
 
-    db.run(`CREATE TABLE quiz (
+    db.run(`CREATE TABLE presentation (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         creator TEXT NOT NULL,
@@ -63,21 +63,21 @@ db.serialize(() => {
         FOREIGN KEY (creator) REFERENCES user (username)
     )`, log);
 
-    db.run(`CREATE TABLE question (
+    db.run(`CREATE TABLE slide (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        quizId INTEGER,
+        presentationId INTEGER,
         question TEXT,
 
-        FOREIGN KEY (quizId) REFERENCES quiz (id)
+        FOREIGN KEY (presentationId) REFERENCES presentation (id)
     )`, log);
 
     db.run(`CREATE TABLE answer (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        questionId INTEGER,
+        slideId INTEGER,
         answerText TEXT,
         isCorrect INTEGER,
 
-        FOREIGN KEY (questionId) REFERENCES question (id)
+        FOREIGN KEY (slideId) REFERENCES slide (id)
     )`, log);
 
     db.run(`CREATE TABLE userAnswer (
@@ -85,10 +85,10 @@ db.serialize(() => {
         user TEXT,
         answerId INTEGER,
 
-        FOREIGN KEY (questionId) REFERENCES question (id),
+        FOREIGN KEY (slideId) REFERENCES slide (id),
         FOREIGN KEY (user) REFERENCES user (username),
-        FOREIGN KEY (answerId) REFERENCES answer (answerId),
-        PRIMARY KEY (questionId, user)
+        FOREIGN KEY (answerId) REFERENCES answer (id),
+        PRIMARY KEY (slideId, user)
     )`, log);
 
     let statement = db.prepare("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)");

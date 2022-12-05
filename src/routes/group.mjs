@@ -74,13 +74,13 @@ router.get("/updateUser", async (req, res) => {
 })
 
 router.get("/createdBy", async (req, res) => {
-	let groups = await db.getAllGroup(getUsername(req.query), "creator");
+	let groups = await db.getAllGroup(req.user.username, "creator");
 	sendGroupData(res, groups)
 })
 
 router.get("/joinedBy", async (req, res) => {
 	let query = req.query;
-	let groups = await db.getGroupsUserIn(getUsername(query));
+	let groups = await db.getGroupsUserIn(query.user.username);
 	sendGroupData(res, groups);
 })
 

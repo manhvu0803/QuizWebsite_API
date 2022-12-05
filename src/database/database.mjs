@@ -103,5 +103,3 @@ export function run(queryString, params = []) {
 		});
 	})
 }
-
-export default db;
