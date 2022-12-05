@@ -74,31 +74,23 @@ router.get("/updateUser", async (req, res) => {
 })
 
 router.get("/createdBy", async (req, res) => {
-	try {
-		let groups = await db.getAllGroup(getUsername(req.query), "creator");
-		let creator = null;
-        if (groups.length > 0) {
-            creator = await db.getUser(groups[0].creator);
-            delete creator.password;
-            delete creator.username;
-        }
-
-		sendData(res, { creator, groups });
-	}
-	catch (error) {
-		sendError(res, error);
-	}
+	let groups = await db.getAllGroup(getUsername(req.query), "creator");
+	sendGroupData(res, groups)
 })
 
 router.get("/joinedBy", async (req, res) => {
 	let query = req.query;
-
 	let groups = await db.getGroupsUserIn(getUsername(query));
+	sendGroupData(res, groups);
+})
 
+async function sendGroupData(res, groups)
+{
 	try {
 		for (let group of groups) {
 			group.creator = await db.getUser(group.creator);
 			delete group.creator.password;
+			delete group.creator.username;
 		}
 
 		sendData(res, groups);
@@ -106,7 +98,7 @@ router.get("/joinedBy", async (req, res) => {
 	catch (error) {
 		sendError(res, error);
 	}
-})
+}
 
 router.get("/invite", async (req, res) => {
 	let query = req.query;
