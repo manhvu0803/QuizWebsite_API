@@ -85,27 +85,3 @@ router.get("/updateAnswer", (req, res) => {
 })
 
 export default router;
-
-function getPresentationName(query) {
-    return query.presentationName ?? query.presentationname ?? query.name;
-}
-
-function getPresentationId(query) {
-    return query.presentationId ?? query.presentationid ?? query.presentationnID ?? query.id;
-}
-
-function getSlideId(query) {
-    return query.slideId ?? query.slideid ?? query.slideID;
-}
-
-function getAnswerText(query) {
-    return query.answerText ?? query.answertext ?? query.answer;
-}
-
-function getAnswerId(query) {
-    return query.answerId ?? query.answerid ?? query.answerID;
-}
-
-function getCorrect(query) {
-    return query.isCorrect ?? query.iscorrect ?? query.correct;
-}

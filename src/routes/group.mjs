@@ -79,8 +79,7 @@ router.get("/createdBy", async (req, res) => {
 })
 
 router.get("/joinedBy", async (req, res) => {
-	let query = req.query;
-	let groups = await db.getGroupsUserIn(query.user.username);
+	let groups = await db.getGroupsUserIn(req.user.username);
 	sendGroupData(res, groups);
 })
 
