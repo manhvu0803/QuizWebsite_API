@@ -41,7 +41,7 @@ router.get("/get", (req, res) => {
         return;
     }
 
-    run(res, db.getPresentationsOf(getUsername(req.query)));
+    run(res, db.getPresentationsOf(req.user.username));
 })
 
 router.get("/update", (req, res) => {
