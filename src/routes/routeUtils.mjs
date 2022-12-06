@@ -22,9 +22,19 @@ export function getInviteId(query) {
 	return query.inviteId ?? query.inviteid ?? query.inviteID;
 }
 
-export async function run(res, promise) {
+export async function resolve(res, promise) {
 	try {
 		let data = await promise;
+        sendData(res, data);
+	}
+	catch (err) {
+        sendError(res, err);
+	}
+}
+
+export async function run(res, callback) {
+	try {
+		let data = await callback();
         sendData(res, data);
 	}
 	catch (err) {

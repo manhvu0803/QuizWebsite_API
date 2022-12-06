@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import "dotenv/config";
 import { OAuth2Client } from "google-auth-library";
 import * as db from "../database/userDatabase.mjs";
-import { getClientId, getUsername, sendData, sendError, run, getAvatarUrl, getDisplayName } from "./routeUtils.mjs"
+import { getClientId, getUsername, sendData, sendError, getAvatarUrl, getDisplayName } from "./routeUtils.mjs"
 import { sendConfirmationEmail } from "../mailer.js";
 
 const GoogleClientID = process.env.GoogleClientID;

@@ -41,6 +41,10 @@ export function updatePresentation(id, data) {
 	return db.updateData("presentation", "id", id, columns, values);
 }
 
+export function removePresentation(id) {
+	return db.deleteData("presentation", "id", id);
+}
+
 /**
  * Get all slides of a presentation
  * @param {string} presentationId presentation ID
@@ -62,6 +66,10 @@ export function updateSlide(id, question) {
 	return db.updateData("slide", "question", question, "id", id);
 }
 
+export function removeSlide(id) {
+	return db.deleteData("slide", "id", id);
+}
+
 export function getAnswersOF(slideId) {
 	return db.getAllData("answer", "slideId", slideId);
 }
@@ -72,4 +80,8 @@ export function addAnswer(slideId, answerText, isCorrect) {
 
 export function updateAnswer(id, answerText) {
 	return db.updateData("answer", "answerText", answerText, "id", id);
+}
+
+export function removeAnswer(id) {
+	return db.deleteData("answer", "id", id);
 }

@@ -1,6 +1,6 @@
 import express from "express";
 import * as db from "../database/userDatabase.mjs";
-import { getGroupName, getInviteId, getUsername, run, sendData, sendError } from "./routeUtils.mjs"
+import { getGroupName, getInviteId, getUsername, resolve, sendData, sendError } from "./routeUtils.mjs"
 import { sendInviteEmail } from "../mailer.js";
 
 const router = express.Router();
@@ -14,7 +14,7 @@ router.get("/create", async (req, res) => {
 		return;
 	}
 
-	await run(res, db.addGroup(getGroupName(query) ?? query.name, getUsername(query) ?? query.creator));
+	resolve(res, db.addGroup(getGroupName(query) ?? query.name, getUsername(query) ?? query.creator));
 })
 
 router.get("/addUser", async (req, res) => {
@@ -65,12 +65,12 @@ router.get("/get", async (req, res) => {
 
 router.get("/kickUser", async (req, res) => {
 	let query = req.query;
-	await run(res, db.removeGroupMember(getGroupName(query), getUsername(query)));
+	await resolve(res, db.removeGroupMember(getGroupName(query), getUsername(query)));
 })
 
 router.get("/updateUser", async (req, res) => {
 	let query = req.query;
-	await run(res, db.updateGroupMember(getGroupName(query), getUsername(query), query.role));
+	await resolve(res, db.updateGroupMember(getGroupName(query), getUsername(query), query.role));
 })
 
 router.get("/createdBy", async (req, res) => {

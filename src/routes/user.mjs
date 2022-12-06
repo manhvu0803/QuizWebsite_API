@@ -1,7 +1,7 @@
 import express from "express";
 import * as db from "../database/userDatabase.mjs";
 import "dotenv/config"
-import { getClientId, getUsername, sendData, sendError, run, getAvatarUrl, getDisplayName } from "./routeUtils.mjs"
+import { getClientId, getUsername, sendData, sendError, resolve, getAvatarUrl, getDisplayName } from "./routeUtils.mjs"
 
 
 const router = express.Router();
@@ -28,7 +28,7 @@ router.get("/edit", (req, res) => {
         avatarUrl: getAvatarUrl(query)
     }
 
-    run(res, db.updateUser(getUsername(query), data));
+    resolve(res, db.updateUser(getUsername(query), data));
 })
 
 router.get("/logout", async (req, res) => {
@@ -41,16 +41,7 @@ router.get("/logout", async (req, res) => {
         return;
     }
 
-    let token = await db.getToken(req.user.username, "user");
-
-    if (clientId != token.clientId) {
-        sendError(res, "User isn't logged in on this client");
-        return;
-    }
-    
-    await db.removeToken(clientId, "clientId");
-
-    sendData(res, "Success");
+    resolve(res, db.removeToken(req.user.clientId, "clientId"));
 })
 
 router.get("/test", (req, res) => {

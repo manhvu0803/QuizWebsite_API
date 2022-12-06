@@ -21,11 +21,25 @@ export function insertData(table, columns, values) {
 	return run(`INSERT INTO ${table} (${columns.join(", ")}) VALUES (${string})`);
 }
 
+/**
+ * @param {string} table 
+ * @param {string | string[]} columns 
+ * @param {any | []} compareValues 
+ * @returns {Promise}
+ */
 export function deleteData(table, columns, compareValues) {
 	let string = `DELETE FROM ${table} WHERE ${columnValueString(columns, compareValues)}`;
 	return run(string);
 }
 
+/**
+ * @param {string} table 
+ * @param {string | string[]} columns 
+ * @param {any | []} values 
+ * @param {string | string[]} compareColumns 
+ * @param {any | []} compareValues
+ * @returns {Promise}
+ */
 export function updateData(table, columns, values, compareColumns, compareValues) {
 	let string = `UPDATE ${table} SET ${columnValueString(columns, values, ",")}`
 	string += ` WHERE ${columnValueString(compareColumns, compareValues)}`;
@@ -50,6 +64,13 @@ export function columnValue(data) {
 	return { columns, values };
 }
 
+/**
+ * 
+ * @param {string | string[]} columns 
+ * @param {any | []} values 
+ * @param {string} seperator 
+ * @returns {string}
+ */
 function columnValueString(columns, values, seperator = " AND") {
 	if (Array.isArray(columns)) {
 		let string = `${columns[0]} = '${values[0]}'`;
