@@ -4,7 +4,7 @@ import { sendData, sendError, resolve, getUsername } from "./routeUtils.mjs";
 
 const router = express.Router();
 
-router.get("/add", async (req, res) => {
+router.get("/create", async (req, res) => {
     try {
         let result = await db.addPresentation(getPresentationName(req.query), req.user.name);
         await addSlide(result.lastID);
