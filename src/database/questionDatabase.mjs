@@ -75,7 +75,7 @@ export function getAnswersOF(slideId) {
 }
 
 export function addAnswer(slideId, answerText, isCorrect) {
-	return db.insertData("slide", ["slideId", "answerText", "isCorrect"], [slideId, answerText, isCorrect]);
+	return db.insertData("answer", ["slideId", "answerText", "isCorrect"], [slideId, answerText, isCorrect]);
 }
 
 export function updateAnswer(id, answerText) {
