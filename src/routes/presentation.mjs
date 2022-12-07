@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/add", async (req, res) => {
     try {
-        let result = await db.addPresentation(getPresentationName(req.query), req.user.username);
+        let result = await db.addPresentation(getPresentationName(req.query), req.user.name);
         await addSlide(result.lastID);
         sendData(res, { presentationId: result.lastID });
     }
