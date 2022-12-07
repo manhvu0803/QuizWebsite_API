@@ -1,6 +1,6 @@
 import express, { query } from "express";
 import * as db from "../database/questionDatabase.mjs";
-import { sendData, sendError, resolve, getUsername } from "./routeUtils.mjs";
+import { sendData, sendError, resolve, run, getUsername } from "./routeUtils.mjs";
 
 const router = express.Router();
 
@@ -18,11 +18,22 @@ router.get("/create", async (req, res) => {
 router.get("/get", (req, res) => {
     let id = getPresentationId(req.query);
     if (id) {
-        resolve(res, db.getPresentation(id));
+        run(res, async () => {
+            let presentation = await db.getPresentation(id);
+            presentation.slides = await db.getSlidesOf(id);
+        });
+        
         return;
     }
 
-    resolve(res, db.getPresentationsOf(getUsername(req.query)));
+    let username = getUsername(req.query);
+
+    if (username) {
+        resolve(res, db.getPresentationsOf(username));
+    }
+    else {
+        resolve(res, db.getPresentationsOf(req.user.name));
+    }
 })
 
 router.get("/update", (req, res) => {
@@ -50,9 +61,14 @@ async function addSlide(presentationId) {
     return result;
 }
 
-router.get("/getSlide", (req, res) => {
+router.get("/getSlide", async (req, res) => {
     if (req.query.id) {
-        resolve(res, db.getSlide(req.query.id));
+        run(res, async () => {
+            let slide = await db.getSlide(getSlideId(req.query) ?? req.query.id);
+            slide.answers = await db.getAnswersOf(slide.id);
+            return slide;
+        })
+
         return;
     }
 
@@ -72,16 +88,12 @@ router.get("/addAnswer", async (req, res) => {
     resolve(res, db.addAnswer(getSlideId(query), getAnswerText(query), getCorrect(query)));
 })
 
-router.get("/getAnswer", (req, res) => {
-    resolve(res, db.getAnswersOF(getSlideId(req.query)));
-})
-
 router.get("/updateAnswer", (req, res) => {
     resolve(res, db.updateAnswer(getAnswerId(req.query), getAnswerText(req.query)));
 })
 
-router.get("/updateAnswer", (req, res) => {
-    resolve(res, db.updateAnswer(getAnswerId(req.query), getAnswerText(req.query)));
+router.get("/deleteAnswer", (req, res) => {
+    resolve(res, db.removeAnswer(getAnswerId(req.query)));
 })
 
 export default router;

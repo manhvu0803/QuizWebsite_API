@@ -56,7 +56,7 @@ db.serialize(() => {
     db.run(`CREATE TABLE presentation (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        creator TEXT NOT NULL,
+        creator TEXT,
         timeCreated INTEGER,
 
         UNIQUE (name, creator),

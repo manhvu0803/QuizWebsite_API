@@ -70,7 +70,7 @@ export function removeSlide(id) {
 	return db.deleteData("slide", "id", id);
 }
 
-export function getAnswersOF(slideId) {
+export function getAnswersOf(slideId) {
 	return db.getAllData("answer", "slideId", slideId);
 }
 
