@@ -37,7 +37,13 @@ router.get("/get", (req, res) => {
 })
 
 router.get("/update", (req, res) => {
-    resolve(res, db.updatePresentation(getPresentationId(req.query) ?? req.query.id, req.query));
+    let query = req.query;
+    let data = {
+        name: req.query.name ?? req.query.presentationName ?? req.query.presentationname,
+        group: req.query.group ?? req.query.groupName ?? req.query.groupname
+    }
+    
+    resolve(res, db.updatePresentation(getPresentationId(req.query) ?? req.query.id, data));
 })
 
 router.get("/delete", (req, res) => {
