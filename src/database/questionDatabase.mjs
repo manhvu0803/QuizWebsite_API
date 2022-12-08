@@ -72,7 +72,7 @@ export async function removeSlide(id) {
 export async function removeSlidesOf(presentationId) {
 	let slides = await getSlidesOf(presentationId);
 	let promises = [];
-	for (let slide in slides) {
+	for (let slide of slides) {
 		promises.push(removeOptionsOf(slide.id));
 	}
 

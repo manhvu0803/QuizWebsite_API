@@ -47,7 +47,7 @@ router.get("/update", (req, res) => {
 })
 
 router.get("/delete", (req, res) => {
-    resolve(res, db.removePresentation(getPresentationId(req.query) ?? req.query.id, req.query));
+    resolve(res, db.removePresentation(getPresentationId(req.query) ?? req.query.id));
 })
 
 router.get("/addSlide", async (req, res) => {
