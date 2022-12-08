@@ -3,7 +3,6 @@ import * as db from "../database/userDatabase.mjs";
 import "dotenv/config"
 import { getClientId, getUsername, sendData, sendError, resolve, getAvatarUrl, getDisplayName } from "./routeUtils.mjs"
 
-
 const router = express.Router();
 
 router.get("/get", async (req, res) => {

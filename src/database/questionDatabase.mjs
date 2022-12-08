@@ -100,10 +100,17 @@ export function updateAnswer(id, answerText) {
 	return db.updateData("answer", "answerText", answerText, "id", id);
 }
 
-export function removeAnswer(id) {
-	return db.deleteData("answer", "id", id);
+export async function removeAnswersOf(slideId) {
+	let answers = await getAnswersOf(slideId);
+	let promises = [];
+	for (let answer of answers) {
+		promises.push(removeAnswer(id));
+	}
+
+	return Promise.all(promises);
 }
 
-export function removeAnswersOf(slideId) {
-	return db.deleteData("answer", "slideId", slideId);
+export async function removeAnswer(id) {
+	await db.deleteData("userAnswer", "answerId", id);
+	return db.deleteData("answer", "id", id);
 }

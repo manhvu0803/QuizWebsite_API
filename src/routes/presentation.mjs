@@ -109,7 +109,13 @@ router.get("/addAnswer", async (req, res) => {
 })
 
 router.get("/updateAnswer", (req, res) => {
-    resolve(res, db.updateAnswer(getAnswerId(req.query), getAnswerText(req.query)));
+    let query = req.query;
+    let data = {
+        answerText: getAnswerText(query),
+        isCorrect: getCorrect(query)
+    }
+    
+    resolve(res, db.updateAnswer(getAnswerId(query), data));
 })
 
 router.get("/deleteAnswer", (req, res) => {

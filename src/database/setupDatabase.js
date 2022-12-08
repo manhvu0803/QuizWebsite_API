@@ -81,11 +81,9 @@ db.serialize(() => {
     )`, log);
 
     db.run(`CREATE TABLE userAnswer (
-        slideId INTEGER,
         user TEXT,
         answerId INTEGER,
 
-        FOREIGN KEY (slideId) REFERENCES slide (id),
         FOREIGN KEY (user) REFERENCES user (username),
         FOREIGN KEY (answerId) REFERENCES answer (id),
         PRIMARY KEY (slideId, user)
