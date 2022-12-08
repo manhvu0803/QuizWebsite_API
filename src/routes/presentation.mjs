@@ -72,7 +72,6 @@ router.get("/getSlide", async (req, res) => {
     let slideId = getSlideId(req.query) ?? req.query.id;
     if (slideId) {
         run(res, getFullSlide);
-
         return;
     }
 

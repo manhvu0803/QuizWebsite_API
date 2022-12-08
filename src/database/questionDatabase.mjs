@@ -1,3 +1,4 @@
+import { SlideType } from "../define.mjs";
 import * as db from "./database.mjs"
 
 /**
@@ -34,7 +35,7 @@ export function addPresentation(name, creator) {
 
 export function updatePresentation(id, data) {
 	let { columns, values } = db.columnValue(data);
-	return db.updateData("presentation", "id", id, columns, values);
+	return db.updateData("presentation", columns, values, "id", id);
 }
 
 export async function removePresentation(id) {
@@ -55,8 +56,8 @@ export function getSlide(id) {
 	return db.getData("slide", "id", id);
 }
 
-export function addSlide(presentationId, question) {
-	return db.insertData("slide", ["presentationId", "question"], [presentationId, question]);
+export function addSlide(presentationId, question, type = SlideType.OneChoice) {
+	return db.insertData("slide", ["presentationId", "question", "type"], [presentationId, question, type]);
 }
 
 export function updateSlide(id, question) {
@@ -85,7 +86,11 @@ export function getOption(id) {
 }
 
 export function getOptionsOf(slideId) {
-	return db.getAllData("option", "slideId", slideId);
+	let query = `SELECT option.*, COUNT(answer.optionId) as answerAmount 
+					FROM option LEFT JOIN answer ON option.id = answer.optionId
+					WHERE option.slideId = ${slideId}
+					GROUP BY option.id`;
+	return db.all(query);
 }
 
 export function addOption(slideId, optionText, isCorrect) {
@@ -107,6 +112,6 @@ export async function removeOptionsOf(slideId) {
 }
 
 export async function removeOptions(id) {
-	await db.deleteData("userAnswer", "optionId", id);
+	await db.deleteData("answer", "optionId", id);
 	return db.deleteData("option", "id", id);
 }

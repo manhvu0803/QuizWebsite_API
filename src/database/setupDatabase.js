@@ -67,6 +67,7 @@ db.serialize(() => {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		presentationId INTEGER,
 		question TEXT,
+		type INTEGER NOT NULL,
 
 		FOREIGN KEY (presentationId) REFERENCES presentation (id)
 	)`, log);
@@ -76,7 +77,6 @@ db.serialize(() => {
 		slideId INTEGER,
 		optionText TEXT,
 		isCorrect INTEGER,
-		type INTEGER,
 
 		FOREIGN KEY (slideId) REFERENCES slide (id)
 	)`, log);
@@ -113,9 +113,9 @@ db.serialize(() => {
 	statement.run(["Easy quiz", "guest", Date.now() - 10002]);
 	statement.finalize(() => console.log("Inserted into table presentation"));
 	
-	statement = db.prepare("INSERT INTO slide (presentationId, question) VALUES (?, ?)");
-	statement.run([1, "1 + 1 = ?"]);
-	statement.run([1, "Why?"]);
+	statement = db.prepare("INSERT INTO slide (presentationId, question, type) VALUES (?, ?, ?)");
+	statement.run([1, "1 + 1 = ?", 1]);
+	statement.run([1, "Why?", 1]);
 	statement.finalize(() => console.log("Inserted into table slide"));
 	
 	statement = db.prepare("INSERT INTO option (slideId, optionText, isCorrect) VALUES (?, ?, ?)");
@@ -128,7 +128,7 @@ db.serialize(() => {
 	statement.run([2, "Hello", true]);
 	statement.run([2, "Eh", false]);
 	statement.run([2, "IDK", false]);
-	statement.finalize(() => console.log("Inserted into table answer"))
+	statement.finalize(() => console.log("Inserted into table option"))
 });
 
 db.close();
