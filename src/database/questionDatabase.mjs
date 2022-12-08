@@ -66,7 +66,7 @@ export function updateSlide(id, question) {
 	return db.updateData("slide", "question", question, "id", id);
 }
 
-export function removeSlide(id) {
+export async function removeSlide(id) {
 	await removeAnswersOf(id);
 	return db.deleteData("slide", "id", id);
 }
