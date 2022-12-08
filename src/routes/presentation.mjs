@@ -71,7 +71,7 @@ async function addSlide(presentationId) {
 router.get("/getSlide", async (req, res) => {
     let slideId = getSlideId(req.query) ?? req.query.id;
     if (slideId) {
-        run(res, getFullSlide);
+        resolve(res, getFullSlide(slideId));
         return;
     }
 
@@ -80,6 +80,11 @@ router.get("/getSlide", async (req, res) => {
 
 async function getFullSlide(slideId) {
     let slide = await db.getSlide(slideId);
+
+    if (!slide) {
+        throw new Error(`Slide ID ${slideId} doesn't exists`);
+    }
+
     slide.options = await db.getOptionsOf(slide.id);
     return slide;
 }
