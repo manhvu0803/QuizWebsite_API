@@ -83,6 +83,10 @@ export async function removeSlidesOf(presentationId) {
 	return db.deleteData("slide", "presentationId", presentationId);
 }
 
+export function getAnswer(id) {
+	return db.getData("answer", "id", id);
+}
+
 export function getAnswersOf(slideId) {
 	return db.getAllData("answer", "slideId", slideId);
 }

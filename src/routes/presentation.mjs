@@ -68,9 +68,10 @@ async function addSlide(presentationId) {
 }
 
 router.get("/getSlide", async (req, res) => {
-    if (req.query.id) {
+    let slideId = getSlideId(req.query) ?? req.query.id;
+    if (slideId) {
         run(res, async () => {
-            let slide = await db.getSlide(getSlideId(req.query) ?? req.query.id);
+            let slide = await db.getSlide(slideId);
             slide.answers = await db.getAnswersOf(slide.id);
             return slide;
         })
@@ -98,6 +99,12 @@ router.get("/deleteSlide", (req, res) => {
 
 router.get("/addAnswer", async (req, res) => {
     let query = req.query;
+    let answerId = getAnswerId(req.query);
+    if (answerId) {
+        resolve(res, db.getAnswer(answerId));
+        return;
+    }
+    
     resolve(res, db.addAnswer(getSlideId(query), getAnswerText(query), getCorrect(query)));
 })
 

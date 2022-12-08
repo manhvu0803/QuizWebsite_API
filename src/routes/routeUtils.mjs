@@ -25,29 +25,29 @@ export function getInviteId(query) {
 export async function resolve(res, promise) {
 	try {
 		let data = await promise;
-        sendData(res, data);
+		sendData(res, data);
 	}
 	catch (err) {
-        sendError(res, err);
+		sendError(res, err);
 	}
 }
 
 export async function run(res, callback) {
 	try {
 		let data = await callback();
-        sendData(res, data);
+		sendData(res, data);
 	}
 	catch (err) {
-        sendError(res, err);
+		sendError(res, err);
 	}
 }
 
 export function sendData(res, data) {
-    res.status(200).json(data);
+	res.status(200).json(data);
 }
 
 export function sendError(res, error) {
-    console.trace("Request error:");
-    console.log(error);
-    res.status(400).json({ error: `${error}` });
+	console.trace("Request error:");
+	console.log(error);
+	res.status(400).json({ error: `${error}` });
 }
