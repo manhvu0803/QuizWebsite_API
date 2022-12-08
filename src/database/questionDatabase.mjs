@@ -67,7 +67,20 @@ export function updateSlide(id, question) {
 }
 
 export function removeSlide(id) {
+	await removeAnswersOf(id);
 	return db.deleteData("slide", "id", id);
+}
+
+export async function removeSlidesOf(presentationId) {
+	let slides = await getSlidesOf(presentationId);
+	let promises = [];
+	for (let slide in slides) {
+		promises.push(removeAnswersOf(slide.id));
+	}
+
+	await Promise.all(promises);
+
+	return db.deleteData("slide", "presentationId", presentationId);
 }
 
 export function getAnswersOf(slideId) {
@@ -84,4 +97,8 @@ export function updateAnswer(id, answerText) {
 
 export function removeAnswer(id) {
 	return db.deleteData("answer", "id", id);
+}
+
+export function removeAnswersOf(slideId) {
+	return db.deleteData("answer", "slideId", slideId);
 }

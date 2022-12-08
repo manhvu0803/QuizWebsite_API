@@ -16,7 +16,7 @@ router.get("/create", async (req, res) => {
 })
 
 router.get("/get", (req, res) => {
-    let id = getPresentationId(req.query);
+    let id = getPresentationId(req.query) ?? req.query.id;
     if (id) {
         run(res, async () => {
             let presentation = await db.getPresentation(id);
@@ -37,11 +37,11 @@ router.get("/get", (req, res) => {
 })
 
 router.get("/update", (req, res) => {
-    resolve(res, db.updatePresentation(getPresentationId(req.query), req.query));
+    resolve(res, db.updatePresentation(getPresentationId(req.query) ?? req.query.id, req.query));
 })
 
 router.get("/delete", (req, res) => {
-    resolve(res, db.removePresentation(getPresentationId(req.query), req.query));
+    resolve(res, db.removePresentation(getPresentationId(req.query) ?? req.query.id, req.query));
 })
 
 router.get("/addSlide", async (req, res) => {
@@ -80,7 +80,14 @@ router.get("/updateSlide", (req, res) => {
 })
 
 router.get("/deleteSlide", (req, res) => {
-    resolve(res, db.removeSlide(getSlideId(req.query), req.query));
+    let id = getSlideId(req.query);
+    if (id) {
+        resolve(res, db.removeSlide(id, req.query));
+        return;
+    }
+
+    let presentationId = getPresentationId(req.query);
+    resolve(res, db.removeSlidesOf(presentationId));
 })
 
 router.get("/addAnswer", async (req, res) => {
@@ -103,7 +110,7 @@ function getPresentationName(query) {
 }
 
 function getPresentationId(query) {
-    return query.presentationId ?? query.presentationid ?? query.presentationnID ?? query.id;
+    return query.presentationId ?? query.presentationid ?? query.presentationnID;
 }
 
 function getSlideId(query) {
