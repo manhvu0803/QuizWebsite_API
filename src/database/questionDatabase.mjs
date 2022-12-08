@@ -29,7 +29,7 @@ export function getPresentationsOf(creator) {
 }
 
 export function getPresentation(id) {
-	return db.getAllData("presentation", "id", id);
+	return db.getData("presentation", "id", id);
 }
 
 export function addPresentation(name, creator) {
@@ -41,7 +41,7 @@ export function updatePresentation(id, data) {
 	return db.updateData("presentation", "id", id, columns, values);
 }
 
-export function removePresentation(id) {
+export async function removePresentation(id) {
 	await removeSlidesOf(id);
 	return db.deleteData("presentation", "id", id);
 }
