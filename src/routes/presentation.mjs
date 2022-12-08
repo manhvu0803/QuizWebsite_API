@@ -53,7 +53,8 @@ router.get("/delete", (req, res) => {
 router.get("/addSlide", async (req, res) => {
     try {
         let result = await addSlide(getPresentationId(req.query));
-        sendData(res, { slideId: result.lastID });
+        let slide = await getFullSlide(result.lastID);
+        sendData(res, slide);
     }
     catch (error) {
         sendError(res, error);
@@ -62,25 +63,27 @@ router.get("/addSlide", async (req, res) => {
 
 async function addSlide(presentationId) {
     let result = await db.addSlide(presentationId, "Question");
-    await db.addAnswer(result.lastID, "Answer 1", true);
-    await db.addAnswer(result.lastID, "Answer 2", false);
+    await db.addOption(result.lastID, "Answer 1", true);
+    await db.addOption(result.lastID, "Answer 2", false);
     return result;
 }
 
 router.get("/getSlide", async (req, res) => {
     let slideId = getSlideId(req.query) ?? req.query.id;
     if (slideId) {
-        run(res, async () => {
-            let slide = await db.getSlide(slideId);
-            slide.answers = await db.getAnswersOf(slide.id);
-            return slide;
-        })
+        run(res, getFullSlide);
 
         return;
     }
 
     resolve(res, db.getSlidesOf(getPresentationId(req.query)));
 })
+
+async function getFullSlide(slideId) {
+    let slide = await db.getSlide(slideId);
+    slide.options = await db.getOptionsOf(slide.id);
+    return slide;
+}
 
 router.get("/updateSlide", (req, res) => {
     resolve(res, db.updateSlide(getSlideId(req.query), req.query.question));
@@ -97,29 +100,29 @@ router.get("/deleteSlide", (req, res) => {
     resolve(res, db.removeSlidesOf(presentationId));
 })
 
-router.get("/addAnswer", async (req, res) => {
+router.get("/addOption", async (req, res) => {
     let query = req.query;
-    let answerId = getAnswerId(req.query);
-    if (answerId) {
-        resolve(res, db.getAnswer(answerId));
+    let optionId = getOptionId(req.query);
+    if (optionId) {
+        resolve(res, db.getOption(optionId));
         return;
     }
     
-    resolve(res, db.addAnswer(getSlideId(query), getAnswerText(query), getCorrect(query)));
+    resolve(res, db.addOption(getSlideId(query), getOptionText(query), getCorrect(query)));
 })
 
-router.get("/updateAnswer", (req, res) => {
+router.get("/updateOption", (req, res) => {
     let query = req.query;
     let data = {
-        answerText: getAnswerText(query),
+        optionText: getOptionText(query),
         isCorrect: getCorrect(query)
     }
     
-    resolve(res, db.updateAnswer(getAnswerId(query), data));
+    resolve(res, db.updateOption(getOptionId(query), data));
 })
 
-router.get("/deleteAnswer", (req, res) => {
-    resolve(res, db.removeAnswer(getAnswerId(req.query)));
+router.get("/deleteOption", (req, res) => {
+    resolve(res, db.removeOptions(getOptionId(req.query)));
 })
 
 export default router;
@@ -136,12 +139,12 @@ function getSlideId(query) {
     return query.slideId ?? query.slideid ?? query.slideID;
 }
 
-function getAnswerText(query) {
-    return query.answerText ?? query.answertext ?? query.answer;
+function getOptionText(query) {
+    return query.optionText ?? query.optiontext ?? query.option;
 }
 
-function getAnswerId(query) {
-    return query.answerId ?? query.answerid ?? query.answerID;
+function getOptionId(query) {
+    return query.optionId ?? query.optionid ?? query.optionID;
 }
 
 function getCorrect(query) {

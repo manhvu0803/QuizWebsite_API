@@ -5,10 +5,6 @@ import * as db from "./database.mjs"
  * @property {number} id
  * @property {number} presentationId
  * @property {string} question
- * @property {string} correctAnswer
- * @property {string} answer1
- * @property {string} answer2
- * @property {string} answer3
  */
 
 /**
@@ -68,7 +64,7 @@ export function updateSlide(id, question) {
 }
 
 export async function removeSlide(id) {
-	await removeAnswersOf(id);
+	await removeOptionsOf(id);
 	return db.deleteData("slide", "id", id);
 }
 
@@ -76,7 +72,7 @@ export async function removeSlidesOf(presentationId) {
 	let slides = await getSlidesOf(presentationId);
 	let promises = [];
 	for (let slide in slides) {
-		promises.push(removeAnswersOf(slide.id));
+		promises.push(removeOptionsOf(slide.id));
 	}
 
 	await Promise.all(promises);
@@ -84,33 +80,33 @@ export async function removeSlidesOf(presentationId) {
 	return db.deleteData("slide", "presentationId", presentationId);
 }
 
-export function getAnswer(id) {
-	return db.getData("answer", "id", id);
+export function getOption(id) {
+	return db.getData("option", "id", id);
 }
 
-export function getAnswersOf(slideId) {
-	return db.getAllData("answer", "slideId", slideId);
+export function getOptionsOf(slideId) {
+	return db.getAllData("option", "slideId", slideId);
 }
 
-export function addAnswer(slideId, answerText, isCorrect) {
-	return db.insertData("answer", ["slideId", "answerText", "isCorrect"], [slideId, answerText, isCorrect]);
+export function addOption(slideId, optionText, isCorrect) {
+	return db.insertData("option", ["slideId", "optionText", "isCorrect"], [slideId, optionText, isCorrect]);
 }
 
-export function updateAnswer(id, answerText) {
-	return db.updateData("answer", "answerText", answerText, "id", id);
+export function updateOption(id, optionText) {
+	return db.updateData("option", "optionText", optionText, "id", id);
 }
 
-export async function removeAnswersOf(slideId) {
-	let answers = await getAnswersOf(slideId);
+export async function removeOptionsOf(slideId) {
+	let options = await getOptionsOf(slideId);
 	let promises = [];
-	for (let answer of answers) {
-		promises.push(removeAnswer(id));
+	for (let option of options) {
+		promises.push(removeOptions(option.id));
 	}
 
 	return Promise.all(promises);
 }
 
-export async function removeAnswer(id) {
-	await db.deleteData("userAnswer", "answerId", id);
-	return db.deleteData("answer", "id", id);
+export async function removeOptions(id) {
+	await db.deleteData("userAnswer", "optionId", id);
+	return db.deleteData("option", "id", id);
 }
