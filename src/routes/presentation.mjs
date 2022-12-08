@@ -21,13 +21,13 @@ router.get("/get", (req, res) => {
         run(res, async () => {
             let presentation = await db.getPresentation(id);
             presentation.slides = await db.getSlidesOf(id);
+            return presentation;
         });
         
         return;
     }
 
     let username = getUsername(req.query);
-
     if (username) {
         resolve(res, db.getPresentationsOf(username));
     }
@@ -39,11 +39,11 @@ router.get("/get", (req, res) => {
 router.get("/update", (req, res) => {
     let query = req.query;
     let data = {
-        name: req.query.name ?? req.query.presentationName ?? req.query.presentationname,
-        group: req.query.group ?? req.query.groupName ?? req.query.groupname
+        name: query.presentationName ?? query.presentationname ?? query.name,
+        group: query.group ?? query.groupName ?? query.groupname
     }
     
-    resolve(res, db.updatePresentation(getPresentationId(req.query) ?? req.query.id, data));
+    resolve(res, db.updatePresentation(getPresentationId(query) ?? query.id, data));
 })
 
 router.get("/delete", (req, res) => {
@@ -61,9 +61,9 @@ router.get("/addSlide", async (req, res) => {
 })
 
 async function addSlide(presentationId) {
-    let result = await db.addSlide(presentationId, "");
-    await db.addAnswer(result.lastID, "", true);
-    await db.addAnswer(result.lastID, "", false);
+    let result = await db.addSlide(presentationId, "Question");
+    await db.addAnswer(result.lastID, "Answer 1", true);
+    await db.addAnswer(result.lastID, "Answer 2", false);
     return result;
 }
 

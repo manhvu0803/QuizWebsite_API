@@ -42,6 +42,7 @@ export function updatePresentation(id, data) {
 }
 
 export function removePresentation(id) {
+	await removeSlidesOf(id);
 	return db.deleteData("presentation", "id", id);
 }
 
