@@ -27,7 +27,7 @@ router.get("/edit", (req, res) => {
 
 router.get("/logout", async (req, res) => {
 
-    let clientId = getClientId(req.clientId);
+    let clientId = req.clientId;
 
     if (!clientId) {
         sendError(res, "No client ID");
