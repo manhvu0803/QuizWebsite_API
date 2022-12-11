@@ -6,15 +6,10 @@ import { getClientId, getUsername, sendData, sendError, resolve, getAvatarUrl, g
 const router = express.Router();
 
 router.get("/get", async (req, res) => {
-    let query = req.query;
-    try {
-        let user = await db.getUser(getUsername(query));
-        delete user.password;
-        sendData(res, user);
-    }
-    catch (error) {
-        sendError(res, error);
-    }
+    let user = req.user;
+    delete user.password;
+    console.log(user);
+    sendData(res, user);
 })
 
 router.get("/edit", (req, res) => {

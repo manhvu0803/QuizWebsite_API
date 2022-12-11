@@ -4,6 +4,7 @@ const cors = require("cors");
 require("./auth/passport");
 const passport = require('passport');
 const { session } = require("passport");
+const getUserInfo = import("./auth/user.mjs");
 
 async function main() {
     const groupRoute = await import("./routes/group.mjs");
@@ -37,9 +38,9 @@ async function main() {
     }))
 
     app.use("/auth", authRoute.default);
-    app.use("/group", passport.authenticate("jwt", {session: false}), groupRoute.default);
-    app.use("/user", passport.authenticate("jwt", {session: false}), userRoute.default);
-    app.use("/presentation", passport.authenticate("jwt", {session: false}), presentationRoute.default);
+    app.use("/group", passport.authenticate("jwt", {session: false}), (await getUserInfo).default, groupRoute.default);
+    app.use("/user", passport.authenticate("jwt", {session: false}), (await getUserInfo).default, userRoute.default);
+    app.use("/presentation", passport.authenticate("jwt", {session: false}), (await getUserInfo).default, presentationRoute.default);
 
     app.listen("5000", () => {
         console.log("Server is running!")

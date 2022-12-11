@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import "dotenv/config";
 import { OAuth2Client } from "google-auth-library";
 import * as db from "../database/userDatabase.mjs";
+import { v4 } from "uuid"
 import { getClientId, getUsername, sendData, sendError, getAvatarUrl, getDisplayName } from "./routeUtils.mjs"
 import { sendConfirmationEmail } from "../mailer.js";
 
@@ -194,12 +195,7 @@ router.get("/login", async (req, res) => {
 
     let user = null;
 
-    let clientId = getClientId(query);
-
-    if (!clientId) {
-        sendError(res, "No client ID");
-        return;
-    }
+    let clientId = v4();
 
     if (token) {
         let tokenInfo = await db.getToken(token);
@@ -210,11 +206,7 @@ router.get("/login", async (req, res) => {
         if (user && user.active === 1) {
             sendData(res, {
                 accessToken: jwt.sign({
-                        name: user.username,
-                        email: user.email,
-                        displayName: user.displayName,
-                        age: user.age,
-                        avatar: user.avatarUrl,
+                        username: user.username,
                         clientId: clientId
                     },
                     process.env.JWT_SECRET,
@@ -270,9 +262,14 @@ router.get("/login", async (req, res) => {
         await db.addToken(token.accessToken, clientId, username);
     }
 
-    sendData(res, {accessToken: jwt.sign({ name: user?.username, avatar:"", clientId: clientId }, process.env.JWT_SECRET, {
-        expiresIn: "1d",
-    }) });
+    sendData(res, {
+        accessToken: jwt.sign({
+            username: user.username,
+            clientId: clientId
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+    )});
 });
 
 
