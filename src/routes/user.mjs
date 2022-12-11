@@ -13,29 +13,28 @@ router.get("/get", async (req, res) => {
 })
 
 router.get("/edit", (req, res) => {
-    let query = req.query;
+    let user = req.user;
 
     let data = {
-        displayName: getDisplayName(query),
-        age: query.age,
-        email: query.email,
-        avatarUrl: getAvatarUrl(query)
+        displayName: user.displayName,
+        age: user.age,
+        email: user.email,
+        avatarUrl: user.avatarUrl
     }
 
     resolve(res, db.updateUser(getUsername(query), data));
 })
 
 router.get("/logout", async (req, res) => {
-    let query = req.query;
 
-    let clientId = getClientId(query);
+    let clientId = getClientId(req.clientId);
 
     if (!clientId) {
         sendError(res, "No client ID");
         return;
     }
 
-    resolve(res, db.removeToken(req.user.clientId, "clientId"));
+    resolve(res, db.removeToken(req.clientId, "clientId"));
 })
 
 router.get("/test", (req, res) => {

@@ -14,7 +14,7 @@ router.get("/create", async (req, res) => {
 		return;
 	}
 
-	resolve(res, db.addGroup(getGroupName(query) ?? query.name, getUsername(query) ?? query.creator));
+	resolve(res, db.addGroup(getGroupName(query) ?? query.name, getUsername(query) ?? req.user.username));
 })
 
 router.get("/addUser", async (req, res) => {
@@ -29,9 +29,11 @@ router.get("/addUser", async (req, res) => {
 
 	let groupMembers = await db.getGroupMembers(group.name);
 
-	let currentUsername = getUsername(query);
+	const user = req.user;
+
+	let currentUsername = user.username;
 	for (let member of groupMembers) {
-		if (member.username == currentUsername || member.email == query.email) {
+		if (member.username == currentUsername || member.email == user.email) {
 			sendError(res, "User is already in group");
 			return;
 		}
@@ -74,12 +76,12 @@ router.get("/updateUser", async (req, res) => {
 })
 
 router.get("/createdBy", async (req, res) => {
-	let groups = await db.getAllGroup(req.user.name, "creator");
+	let groups = await db.getAllGroup(req.user.username, "creator");
 	sendGroupData(res, groups)
 })
 
 router.get("/joinedBy", async (req, res) => {
-	let groups = await db.getGroupsUserIn(req.user.name);
+	let groups = await db.getGroupsUserIn(req.user.username);
 	sendGroupData(res, groups);
 })
 

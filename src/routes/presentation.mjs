@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/create", async (req, res) => {
     try {
-        let result = await db.addPresentation(getPresentationName(req.query), req.user.name);
+        let result = await db.addPresentation(getPresentationName(req.query), req.user.username);
         await addSlide(result.lastID);
         sendData(res, { presentationId: result.lastID });
     }
@@ -23,7 +23,7 @@ router.get("/get", (req, res) => {
             presentation.slides = await db.getSlidesOf(id);
             return presentation;
         });
-        
+
         return;
     }
 
@@ -32,7 +32,7 @@ router.get("/get", (req, res) => {
         resolve(res, db.getPresentationsOf(username));
     }
     else {
-        resolve(res, db.getPresentationsOf(req.user.name));
+        resolve(res, db.getPresentationsOf(req.user.username));
     }
 })
 
@@ -42,7 +42,7 @@ router.get("/update", (req, res) => {
         name: query.presentationName ?? query.presentationname ?? query.name,
         group: query.group ?? query.groupName ?? query.groupname
     }
-    
+
     resolve(res, db.updatePresentation(getPresentationId(query) ?? query.id, data));
 })
 
@@ -111,7 +111,7 @@ router.get("/addOption", async (req, res) => {
         resolve(res, db.getOption(optionId));
         return;
     }
-    
+
     resolve(res, db.addOption(getSlideId(query), getOptionText(query), getCorrect(query)));
 })
 
@@ -121,7 +121,7 @@ router.get("/updateOption", (req, res) => {
         optionText: getOptionText(query),
         isCorrect: getCorrect(query)
     }
-    
+
     resolve(res, db.updateOption(getOptionId(query), data));
 })
 
