@@ -41,8 +41,22 @@ export function deleteData(table, columns, compareValues) {
  * @returns {Promise}
  */
 export function updateData(table, columns, values, compareColumns, compareValues) {
-	let string = `UPDATE ${table} SET ${columnValueString(columns, values, ",")}`
-	string += ` WHERE ${columnValueString(compareColumns, compareValues)}`;
+	let string = `UPDATE ${table} SET ${columnValueString(columns, values, ",")}
+		 		  WHERE ${columnValueString(compareColumns, compareValues)}`;
+	return run(string);
+}
+
+export function upsertData(table, columns, values, compareColumns, compareValues) {
+	let valueString = `'${values[0]}'`;
+	for (let i = 1; i < values.length; ++i) {
+		valueString += `, '${values[i]}'`;
+	}
+
+	let string = `INSERT INTO ${table} (${columns.join(", ")}) VALUES (${valueString})
+				  ON CONFLICT(*)
+				  DO UPDATE ${table} SET ${columnValueString(columns, values, ",")}
+		 		  WHERE ${columnValueString(compareColumns, compareValues)}`;
+
 	return run(string);
 }
 

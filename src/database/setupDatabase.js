@@ -83,13 +83,12 @@ db.serialize(() => {
 
 	db.run(`CREATE TABLE answer (
 		user TEXT,
-		slideId INTEGER,
 		optionId INTEGER,
 		timeAnswered INTEGER,
 
 		FOREIGN KEY (user) REFERENCES user (username),
 		FOREIGN KEY (optionId) REFERENCES option (id),
-		PRIMARY KEY (slideId, user)
+		PRIMARY KEY (optionId, user)
 	)`, log);
 
 	let statement = db.prepare("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)");

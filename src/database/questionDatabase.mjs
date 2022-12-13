@@ -115,3 +115,30 @@ export async function removeOptions(id) {
 	await db.deleteData("answer", "optionId", id);
 	return db.deleteData("option", "id", id);
 }
+
+export function getAnswer(username, optionId) {
+	return db.getData("answer", ["user", "optionId"], [username, optionId]);
+}
+
+export function getAnswersOf(username, slideId) {
+	let query = `SELECT answer.*
+				 FROM answer INNER JOIN option ON answer.optionId = option.id
+				 WHERE option.slideId = ${slideId} AND answer.user = ${username}`;
+	return db.all(slideId);
+}
+
+export function addAnswer(username, optionId) {
+	return db.insertData("answer", ["user", "optionId", "timeAnswerd"], [username, optionId, Date.now()]);
+}
+
+export function removeAnswer(username, optionId) {
+	return db.deleteData("answer", ["user", "optionId"], [username, optionId]);
+}
+
+export function getSlideOf(optionId) {
+	let query = `SELECT slide.*
+				 FROM slide INNER JOIN option on slide.id = option.slideId
+				 WHERE option.id = ${optionId}`;
+
+	return db.get(query);
+}
