@@ -134,11 +134,3 @@ export function addAnswer(username, optionId) {
 export function removeAnswer(username, optionId) {
 	return db.deleteData("answer", ["user", "optionId"], [username, optionId]);
 }
-
-export function getSlideOf(optionId) {
-	let query = `SELECT slide.*
-				 FROM slide INNER JOIN option on slide.id = option.slideId
-				 WHERE option.id = ${optionId}`;
-
-	return db.get(query);
-}
