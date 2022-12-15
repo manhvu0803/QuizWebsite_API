@@ -14,15 +14,16 @@ router.get("/get", async (req, res) => {
 
 router.get("/edit", (req, res) => {
     let user = req.user;
+    let query = req.query;
 
     let data = {
-        displayName: user.displayName,
-        age: user.age,
-        email: user.email,
-        avatarUrl: user.avatarUrl
+        displayName: getDisplayName(query),
+        age: query.age,
+        email: query.email,
+        avatarUrl: getAvatarUrl(query)
     }
 
-    resolve(res, db.updateUser(getUsername(query), data));
+    resolve(res, db.updateUser(user.username, data));
 })
 
 router.get("/logout", async (req, res) => {
