@@ -48,51 +48,65 @@ export function updateUser(username, data) {
 	return db.updateData("user", columns, values, "username", username);
 }
 
-export function getGroup(compareValue, property = "name") {
-	return db.getData("userGroup", property, compareValue);
-}
-
-export function getAllGroup(compareValue, property = "name") {
-	return db.getAllData("userGroup", property, compareValue);
+/**
+ * 
+ * @param {*} compareValue 
+ * @param {string} column default is "id"
+ * @returns 
+ */
+export function getGroup(compareValue, column = "id") {
+	return db.getData("userGroup", column, compareValue);
 }
 
 /**
- * @param {string} groupName 
+ * 
+ * @param {*} compareValue 
+ * @param {string} column default is "id"
+ * @returns 
+ */
+export function getAllGroup(compareValue, column = "id") {
+	return db.getAllData("userGroup", column, compareValue);
+}
+
+/**
+ * @param {number} groupId 
  * @returns {Promise<>}
  */
-export function getGroupMembers(groupName) {
+export function getGroupMembers(groupId) {
 	let query = `SELECT gm.timeJoined, gm.role, user.username, user.email, user.displayName 
                     FROM groupMember gm INNER JOIN user ON gm.user = user.username
-					WHERE gm.groupName = '${groupName}'`;
+					WHERE gm.groupId = '${groupId}'`;
 
 	return db.all(query);
 }
 
 export function getGroupsUserIn(username) {
-	let query = `SELECT ug.* FROM userGroup ug INNER JOIN groupMember gm ON ug.name = gm.groupName WHERE gm.user = '${username}'`;
+	let query = `SELECT ug.* 
+				 FROM userGroup ug INNER JOIN groupMember gm ON ug.id = gm.groupId 
+				 WHERE gm.user = '${username}'`;
 	return db.all(query);
 }
 
 export async function addGroup(name, creator) {
-	await db.insertData("userGroup", ["name", "creator", "timeCreated", "inviteId"], [name, creator, Date.now(), uuid()])
-	return db.insertData("groupMember", ["groupName", "user", "timeJoined", "role"], [name, creator, Date.now(), 1]);
+	let result = await db.insertData("userGroup", ["name", "creator", "timeCreated", "inviteId"], [name, creator, Date.now(), uuid()])
+	return db.insertData("groupMember", ["groupId", "user", "timeJoined", "role"], [result.lastID, creator, Date.now(), 1]);
 }
 
-export function updateGroup(name, data) {
+export function updateGroup(groupId, data) {
 	let { columns, values } = db.columnValue(data);
-	return db.updateData("userGroup", columns, values, "name", name);
+	return db.updateData("userGroup", columns, values, "id", groupId);
 }
 
-export function addGroupMember(groupName, username, role = 3) {
-	return db.insertData("groupMember", ["groupName", "user", "timeJoined", "role"], [groupName, username, Date.now(), role]);
+export function addGroupMember(groupId, username, role = 3) {
+	return db.insertData("groupMember", ["groupId", "user", "timeJoined", "role"], [groupId, username, Date.now(), role]);
 }
 
-export function updateGroupMember(groupName, username, role) {
-	return db.updateData("groupMember", ["groupName", "user"], [groupName, username], "role", role);
+export function updateGroupMember(groupId, username, role) {
+	return db.updateData("groupMember", ["groupId", "user"], [groupId, username], "role", role);
 }
 
-export function removeGroupMember(groupName, username) {
-	return db.deleteData("groupMember", ["groupName", "user"], [groupName, username]);
+export function removeGroupMember(groupId, username) {
+	return db.deleteData("groupMember", ["groupId", "user"], [groupId, username]);
 }
 
 export function addToken(token, clientId, username) {

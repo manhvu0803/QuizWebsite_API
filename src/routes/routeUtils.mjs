@@ -1,7 +1,3 @@
-export function getGroupName(query) {
-	return query.group ?? query.groupname ?? query.groupName;
-}
-
 export function getUsername(query) {
 	return query.user ?? query.username ?? query.userName;
 }
@@ -20,6 +16,10 @@ export function getAvatarUrl(query) {
 
 export function getInviteId(query) {
 	return query.inviteId ?? query.inviteid ?? query.inviteID;
+}
+
+export function getGroupId(query) {
+	return query.groupId ?? query.groupID;
 }
 
 export async function resolve(res, promise) {

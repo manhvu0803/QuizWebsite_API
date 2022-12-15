@@ -16,7 +16,8 @@ db.serialize(() => {
 	db.run("PRAGMA foreign_keys = ON");
 	
 	db.run(`CREATE TABLE userGroup (
-		name TEXT PRIMARY KEY,
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT,
 		creator TEXT,
 		timeCreated INTEGER,
 		inviteId TEXT UNIQUE,
@@ -31,17 +32,18 @@ db.serialize(() => {
 		displayName TEXT,
 		age INTEGER,
 		avatarUrl TEXT,
+		type INTEGER,
 		active INTEGER
 	)`, log);
 
 	db.run(`CREATE TABLE groupMember (
-		groupName TEXT,
+		groupId INTEGER,
 		user TEXT,
 		timeJoined INTEGER,
 		role INTEGER,
 
-		PRIMARY KEY (groupName, user),
-		FOREIGN KEY (groupName) REFERENCES userGroup (name),
+		PRIMARY KEY (groupId, user),
+		FOREIGN KEY (groupId) REFERENCES userGroup (id),
 		FOREIGN KEY (user) REFERENCES user (username)
 	)`, log);
 
@@ -57,9 +59,11 @@ db.serialize(() => {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
 		creator TEXT,
+		groupId INTEGER,
 		timeCreated INTEGER,
 
 		UNIQUE (name, creator),
+		FOREIGN KEY (groupId) REFERENCES userGroup (id),
 		FOREIGN KEY (creator) REFERENCES user (username)
 	)`, log);
 
@@ -91,25 +95,25 @@ db.serialize(() => {
 		PRIMARY KEY (optionId, user)
 	)`, log);
 
-	let statement = db.prepare("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)");
-	statement.run(["anon", "password1", "anonymous@gmail.com", "Teacher Huy", 30, "", true]);
-	statement.run(["guest", "asdfghjk", "hello1123@yahoo.com", "Guest account", 15, "", true]);
-	statement.run(["mniit2", "12345678", "ilou@yahoo.com", "Tran Huy", 15, "", true]);
+	let statement = db.prepare("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+	statement.run(["anon", "password1", "anonymous@gmail.com", "Teacher Huy", 30, "", 0, true]);
+	statement.run(["guest", "asdfghjk", "hello1123@yahoo.com", "Guest account", 15, "", 0, true]);
+	statement.run(["mniit2", "12345678", "ilou@yahoo.com", "Tran Huy", 15, "", 0, true]);
 	statement.finalize(() => console.log("Inserted into table user"));
 	
-	statement = db.prepare("INSERT INTO userGroup VALUES (?, ?, ?, ?)");
+	statement = db.prepare("INSERT INTO userGroup (name, creator, timeCreated, inviteId) VALUES (?, ?, ?, ?)");
 	statement.run(["study", "anon", Date.now() - 1000000, "8126797812647916"]);
 	statement.finalize(() => console.log("Inserted into table userGroup"));
 	
 	statement = db.prepare("INSERT INTO groupMember VALUES (?, ?, ?, ?)");
-	statement.run(["study", "anon", Date.now() - 1000000, 1]);
-	statement.run(["study", "guest", Date.now() - 1000000, 3]);
+	statement.run([1, "anon", Date.now() - 1000000, 1]);
+	statement.run([1, "guest", Date.now() - 1000000, 3]);
 	statement.finalize(() => console.log("Inserted into table groupMember"));
 	
-	statement = db.prepare("INSERT INTO presentation (name, creator, timeCreated) VALUES (?, ?, ?)");
-	statement.run(["Hard quiz", "anon", Date.now()]);
-	statement.run(["Easy quiz", "anon", Date.now() + 1000]);
-	statement.run(["Easy quiz", "guest", Date.now() - 10002]);
+	statement = db.prepare("INSERT INTO presentation (name, creator, groupId, timeCreated) VALUES (?, ?, ?, ?)");
+	statement.run(["Hard quiz", "anon", 1, Date.now()]);
+	statement.run(["Easy quiz", "anon", 1, Date.now() + 1000]);
+	statement.run(["Easy quiz", "guest", 1, Date.now() - 10002]);
 	statement.finalize(() => console.log("Inserted into table presentation"));
 	
 	statement = db.prepare("INSERT INTO slide (presentationId, question, type) VALUES (?, ?, ?)");

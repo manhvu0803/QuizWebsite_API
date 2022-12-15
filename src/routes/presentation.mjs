@@ -1,18 +1,15 @@
 import express, { query } from "express";
 import * as db from "../database/questionDatabase.mjs";
-import { sendData, sendError, resolve, run, getUsername } from "./routeUtils.mjs";
+import { sendData, sendError, resolve, run, getUsername, getGroupId } from "./routeUtils.mjs";
 
 const router = express.Router();
 
 router.get("/create", async (req, res) => {
-    try {
-        let result = await db.addPresentation(getPresentationName(req.query), req.user.username);
+    run(res, async () => {
+        let result = await db.addPresentation(getPresentationName(req.query), getGroupId(req.query). req.user.username);
         await addSlide(result.lastID);
-        sendData(res, { presentationId: result.lastID });
-    }
-    catch (error) {
-        sendError(res, error);
-    }
+        return { presentationId: result.lastID };
+    });
 })
 
 router.get("/get", (req, res) => {
@@ -21,6 +18,7 @@ router.get("/get", (req, res) => {
         run(res, async () => {
             let presentation = await db.getPresentation(id);
             presentation.slides = await db.getSlidesOf(id);
+
             return presentation;
         });
 
@@ -40,7 +38,7 @@ router.get("/update", (req, res) => {
     let query = req.query;
     let data = {
         name: query.presentationName ?? query.presentationname ?? query.name,
-        group: query.group ?? query.groupName ?? query.groupname
+        groupId: getGroupId(query)
     }
 
     resolve(res, db.updatePresentation(getPresentationId(query) ?? query.id, data));
@@ -51,14 +49,12 @@ router.get("/delete", (req, res) => {
 })
 
 router.get("/addSlide", async (req, res) => {
-    try {
+    run(res, async () => {
         let result = await addSlide(getPresentationId(req.query));
         let slide = await getFullSlide(result.lastID);
-        sendData(res, slide);
-    }
-    catch (error) {
-        sendError(res, error);
-    }
+
+        return slide;
+    })
 })
 
 async function addSlide(presentationId) {
@@ -86,6 +82,7 @@ async function getFullSlide(slideId) {
     }
 
     slide.options = await db.getOptionsOf(slide.id);
+
     return slide;
 }
 
