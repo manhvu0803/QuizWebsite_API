@@ -3,7 +3,7 @@ import { Router } from "express";
 import * as db from "../database/questionDatabase.mjs";
 import { run, sendError } from "./routeUtils.mjs";
 
-const socket = new Server();
+var socket;
 
 const router = Router();
 
@@ -37,4 +37,7 @@ router.get("/removeAnswer", async (req, res) => {
     });
 })
 
-export default router;
+export function answerRoute(socketio) {
+    socket = socketio;
+    return router;
+}

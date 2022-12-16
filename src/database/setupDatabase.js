@@ -59,11 +59,9 @@ db.serialize(() => {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
 		creator TEXT,
-		groupId INTEGER,
 		timeCreated INTEGER,
 
 		UNIQUE (name, creator),
-		FOREIGN KEY (groupId) REFERENCES userGroup (id),
 		FOREIGN KEY (creator) REFERENCES user (username)
 	)`, log);
 
@@ -110,10 +108,10 @@ db.serialize(() => {
 	statement.run([1, "guest", Date.now() - 1000000, 3]);
 	statement.finalize(() => console.log("Inserted into table groupMember"));
 	
-	statement = db.prepare("INSERT INTO presentation (name, creator, groupId, timeCreated) VALUES (?, ?, ?, ?)");
-	statement.run(["Hard quiz", "anon", 1, Date.now()]);
-	statement.run(["Easy quiz", "anon", 1, Date.now() + 1000]);
-	statement.run(["Easy quiz", "guest", 1, Date.now() - 10002]);
+	statement = db.prepare("INSERT INTO presentation (name, creator, timeCreated) VALUES (?, ?, ?)");
+	statement.run(["Hard quiz", "anon", Date.now()]);
+	statement.run(["Easy quiz", "anon", Date.now() + 1000]);
+	statement.run(["Easy quiz", "guest", Date.now() - 10002]);
 	statement.finalize(() => console.log("Inserted into table presentation"));
 	
 	statement = db.prepare("INSERT INTO slide (presentationId, question, type) VALUES (?, ?, ?)");
