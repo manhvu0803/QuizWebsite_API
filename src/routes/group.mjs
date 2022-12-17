@@ -1,6 +1,6 @@
 import express from "express";
 import * as db from "../database/userDatabase.mjs";
-import { getInviteId, getUsername, resolve, run, sendData, sendError } from "./routeUtils.mjs"
+import { getInviteId, getGroupId, getUsername, resolve, run, sendError } from "./routeUtils.mjs"
 import { sendInviteEmail } from "../mailer.js";
 
 const router = express.Router();
@@ -8,13 +8,13 @@ const router = express.Router();
 router.get("/create", async (req, res) => {
 	let query = req.query;
 
-	let group = await db.getGroup(getGroupName(query));
+	let group = await db.getGroup(getGroupName(query), "name");
 	if (group) {
 		sendError(res, "Group already exists");
 		return;
 	}
 
-	resolve(res, db.addGroup(getGroupName(query) ?? query.name, getUsername(query) ?? req.user.username));
+	resolve(res, db.addGroup(getGroupName(query), req.user.username));
 })
 
 router.get("/addUser", async (req, res) => {
@@ -44,10 +44,16 @@ router.get("/addUser", async (req, res) => {
 
 router.get("/get", async (req, res) => {
 	let query = req.query;
-	let groupId = getGroupId(query);
+	let groupId = getGroupId(query) ?? query.id;
 
+	let group = await db.getGroup(groupId);
+
+	if (!group) {
+		sendError(res, "Group doesn't exist")
+		return;
+	}
+	
 	run(res, async () => {
-		let group = await db.getGroup(groupId);
 		group.creator = await db.getUser(group.creator);
 		delete group.creator.password;
 		group.members = await db.getGroupMembers(group.name);
@@ -58,12 +64,12 @@ router.get("/get", async (req, res) => {
 
 router.get("/kickUser", async (req, res) => {
 	let query = req.query;
-	await resolve(res, db.removeGroupMember(getGroupId(query), getUsername(query)));
+	await resolve(res, db.removeGroupMember(getGroupId(query) ?? query.id, getUsername(query)));
 })
 
 router.get("/updateUser", async (req, res) => {
 	let query = req.query;
-	await resolve(res, db.updateGroupMember(getGroupId(query), getUsername(query), query.role));
+	await resolve(res, db.updateGroupMember(getGroupId(query) ?? query.id, getUsername(query), query.role));
 })
 
 router.get("/createdBy", async (req, res) => {
@@ -94,29 +100,29 @@ router.get("/invite", async (req, res) => {
 
 	let sender = query.sender;
 	let receiver = query.receiver;
-	let inviteId = query.inviteId;
-	let groupId = getGroupId(query);
+	let inviteId = query.inviteId ?? query.inviteid ?? query.inviteID;
+	let groupId = getGroupId(query) ?? query.id;
 
-	if(!sender && !receiver && !groupId){
+	if (!sender && !receiver && !groupId) {
 		sendError(res, "Missing data!");
         return;
 	}
 
 	let user = await db.getUser(receiver);
 
-	if(!user){
+	if (!user) {
 		sendError(res, "User doesn't exist!");
         return;
 	}
 
-	try {
-		let members = await db.getGroupMembers(groupId);
+	let members = await db.getGroupMembers(groupId);
 
-		if(members.find(({username}) => username === receiver) !== undefined){
-			sendError(res, "User joined group!");
-			return;
-		}
+	if (members.find(({username}) => username === receiver) !== undefined) {
+		sendError(res, "User has already joined group!");
+		return;
+	}
 
+	run(res, async () => {
 		await sendInviteEmail({
 			toUser: { email: user.email, username: user.username }, 
 			inviter: sender, 
@@ -124,13 +130,8 @@ router.get("/invite", async (req, res) => {
 			inviteId: inviteId
 		});
 
-		sendData(res, "Invitation send!");
-
-	}
-	catch (err) {
-		sendError(res, err);
-		return;
-	}
+		return "Invitation sent";
+	})
 })
 
 router.get("/test", (req, res) => {
@@ -141,5 +142,5 @@ router.get("/test", (req, res) => {
 export default router;
 
 function getGroupName(query) {
-	return query.group ?? query.groupname ?? query.groupName;
+	return query.group ?? query.groupname ?? query.groupName ?? query.name;
 }

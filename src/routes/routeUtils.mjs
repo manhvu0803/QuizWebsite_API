@@ -19,7 +19,7 @@ export function getInviteId(query) {
 }
 
 export function getGroupId(query) {
-	return query.groupId ?? query.groupID;
+	return query.groupId ?? query.groupID ?? query.groupid;
 }
 
 export async function resolve(res, promise) {
