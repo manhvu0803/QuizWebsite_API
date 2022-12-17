@@ -37,8 +37,7 @@ router.get("/get", (req, res) => {
 router.get("/update", (req, res) => {
     let query = req.query;
     let data = {
-        name: query.presentationName ?? query.presentationname ?? query.name,
-        groupId: getGroupId(query)
+        name: query.presentationName ?? query.presentationname ?? query.name
     }
 
     resolve(res, db.updatePresentation(getPresentationId(query) ?? query.id, data));
