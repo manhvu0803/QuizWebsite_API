@@ -97,8 +97,9 @@ export function addOption(slideId, optionText, isCorrect) {
 	return db.insertData("option", ["slideId", "optionText", "isCorrect"], [slideId, optionText, isCorrect]);
 }
 
-export function updateOption(id, optionText) {
-	return db.updateData("option", "optionText", optionText, "id", id);
+export function updateOption(id, data) {
+	let { columns, values } = db.columnValue(data);
+	return db.updateData("option", columns, values, "id", id);
 }
 
 export async function removeOptionsOf(slideId) {

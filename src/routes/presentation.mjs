@@ -119,11 +119,11 @@ router.get("/updateOption", (req, res) => {
         isCorrect: getCorrect(query)
     }
 
-    resolve(res, db.updateOption(getOptionId(query), data));
+    resolve(res, db.updateOption(getOptionId(query) ?? query.id, data));
 })
 
 router.get("/deleteOption", (req, res) => {
-    resolve(res, db.removeOptions(getOptionId(req.query)));
+    resolve(res, db.removeOptions(getOptionId(req.query) ?? query.id));
 })
 
 export default router;
