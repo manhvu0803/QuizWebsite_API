@@ -8,9 +8,9 @@
 /addSlide
 /getSlide
 /updateSlide
-/removeSlide
+/deleteSlide
 
 # option
 /addOption
-/removeOption
 /updateOption
+/deleteOption

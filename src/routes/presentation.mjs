@@ -91,6 +91,7 @@ router.get("/updateSlide", (req, res) => {
 
 router.get("/deleteSlide", (req, res) => {
     let id = getSlideId(req.query);
+
     if (id) {
         resolve(res, db.removeSlide(id, req.query));
         return;
@@ -102,13 +103,13 @@ router.get("/deleteSlide", (req, res) => {
 
 router.get("/addOption", async (req, res) => {
     let query = req.query;
-    let optionId = getOptionId(req.query);
-    if (optionId) {
-        resolve(res, db.getOption(optionId));
-        return;
-    }
 
-    resolve(res, db.addOption(getSlideId(query), getOptionText(query), getCorrect(query)));
+    run(res, async () => {
+        let result = await db.addOption(getSlideId(query), getOptionText(query), getCorrect(query));
+        let option = await db.getOption(result.lastID);
+        
+        return option;
+    });
 })
 
 router.get("/updateOption", (req, res) => {
