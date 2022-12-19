@@ -56,7 +56,7 @@ export function getSlide(id) {
 	return db.getData("slide", "id", id);
 }
 
-export function addSlide(presentationId, question, type = SlideType.OneChoice) {
+export function addSlide(presentationId, question, type) {
 	return db.insertData("slide", ["presentationId", "question", "type"], [presentationId, question, type]);
 }
 

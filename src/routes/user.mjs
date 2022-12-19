@@ -12,7 +12,7 @@ router.get("/get", async (req, res) => {
     sendData(res, user);
 })
 
-router.get("/edit", (req, res) => {
+router.get("/edit", async (req, res) => {
     let user = req.user;
     let query = req.query;
 
@@ -20,7 +20,8 @@ router.get("/edit", (req, res) => {
         displayName: getDisplayName(query),
         age: query.age,
         email: query.email,
-        avatarUrl: getAvatarUrl(query)
+        avatarUrl: getAvatarUrl(query),
+        active: query.email == user.email,
     }
 
     resolve(res, db.updateUser(user.username, data));

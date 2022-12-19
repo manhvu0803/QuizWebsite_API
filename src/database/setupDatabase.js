@@ -69,6 +69,7 @@ db.serialize(() => {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		presentationId INTEGER,
 		question TEXT,
+		subtext TEXT,
 		type INTEGER NOT NULL,
 
 		FOREIGN KEY (presentationId) REFERENCES presentation (id)

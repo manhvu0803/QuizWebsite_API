@@ -1,4 +1,5 @@
 export const SlideType = {
-    OneChoice: 0,
-    MultipleChoice: 1
+    MultipleChoice: 0,
+    Paragraph: 1,
+    Heading: 2
 }

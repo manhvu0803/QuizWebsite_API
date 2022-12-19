@@ -1,5 +1,6 @@
 import express, { query } from "express";
 import * as db from "../database/questionDatabase.mjs";
+import { SlideType } from "../define.mjs";
 import { sendData, sendError, resolve, run, getUsername, getGroupId } from "./routeUtils.mjs";
 
 const router = express.Router();
@@ -48,18 +49,24 @@ router.get("/delete", (req, res) => {
 })
 
 router.get("/addSlide", async (req, res) => {
+    let query = req.query;
+
     run(res, async () => {
-        let result = await addSlide(getPresentationId(req.query));
+        let result = await addSlide(getPresentationId(query), getSlideType(query));
         let slide = await getFullSlide(result.lastID);
 
         return slide;
     })
 })
 
-async function addSlide(presentationId) {
-    let result = await db.addSlide(presentationId, "Question");
-    await db.addOption(result.lastID, "Answer 1", true);
-    await db.addOption(result.lastID, "Answer 2", false);
+async function addSlide(presentationId, type = SlideType.MultipleChoice) {
+    let result = await db.addSlide(presentationId, "Question", type);
+
+    if (type === SlideType.MultipleChoice) {
+        await db.addOption(result.lastID, "Answer 1", true);
+        await db.addOption(result.lastID, "Answer 2", false);
+    }
+    
     return result;
 }
 
@@ -86,7 +93,14 @@ async function getFullSlide(slideId) {
 }
 
 router.get("/updateSlide", (req, res) => {
-    resolve(res, db.updateSlide(getSlideId(req.query), req.query.question));
+    let query = req.query;
+    let data = {
+        question: query.question,
+        subtext: query.subtext,
+        type: getSlideType(query),
+    }
+
+    resolve(res, db.updateSlide(getSlideId(query), data));
 })
 
 router.get("/deleteSlide", (req, res) => {
@@ -138,6 +152,10 @@ function getPresentationId(query) {
 
 function getSlideId(query) {
     return query.slideId ?? query.slideid ?? query.slideID;
+}
+
+function getSlideType(query) {
+    return query.slideType ?? query.slidetype;
 }
 
 function getOptionText(query) {
