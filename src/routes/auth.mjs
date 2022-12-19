@@ -106,7 +106,7 @@ router.post("/login/google", async (req, res) => {
         if(profile.email_verified)
             sendData(res, {
                 accessToken: jwt.sign({
-                        name: profile.sub,
+                        username: profile.sub,
                         email: profile.email,
                         displayName: profile.name,
                         age: null,
