@@ -6,15 +6,7 @@ import { sendInviteEmail } from "../mailer.js";
 const router = express.Router();
 
 router.get("/create", async (req, res) => {
-	let query = req.query;
-
-	let group = await db.getGroup(getGroupName(query), "name");
-	if (group) {
-		sendError(res, "Group already exists");
-		return;
-	}
-
-	resolve(res, db.addGroup(getGroupName(query), req.user.username));
+	resolve(res, db.addGroup(getGroupName(req.query), req.user.username));
 })
 
 router.get("/addUser", async (req, res) => {

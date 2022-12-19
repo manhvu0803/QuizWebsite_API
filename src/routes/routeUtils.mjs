@@ -22,19 +22,13 @@ export function getGroupId(query) {
 	return query.groupId ?? query.groupID ?? query.groupid;
 }
 
+export async function run(res, callback) {
+	return resolve(res, callback());
+}
+
 export async function resolve(res, promise) {
 	try {
 		let data = await promise;
-		sendData(res, data);
-	}
-	catch (err) {
-		sendError(res, err);
-	}
-}
-
-export async function run(res, callback) {
-	try {
-		let data = await callback();
 		sendData(res, data);
 	}
 	catch (err) {
@@ -47,7 +41,7 @@ export function sendData(res, data) {
 }
 
 export function sendError(res, error) {
-	console.trace("Request error:");
-	console.log(error);
+	console.log("Request error:");
+	console.trace(error);
 	res.status(400).json({ error: `${error}` });
 }
