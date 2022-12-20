@@ -1,5 +1,6 @@
 import { SlideType } from "../define.mjs";
 import * as db from "./database.mjs"
+import { addCreatorData } from "./userDatabase.mjs";
 
 /**
  * @typedef {Object} slide
@@ -21,8 +22,10 @@ import * as db from "./database.mjs"
  * @param {string} creator creator username
  * @returns {Promise<presentation[]>} array of presentations
  */
-export function getPresentationsOf(creator) {
-	return db.getAllData("presentation", "creator", creator);
+export async function getPresentationsOf(creator) {
+	let data = await db.getAllData("presentation", "creator", creator);
+	await addCreatorData(data);
+	return data;
 }
 
 export function getPresentation(id) {
@@ -60,8 +63,9 @@ export function addSlide(presentationId, question, type) {
 	return db.insertData("slide", ["presentationId", "question", "type"], [presentationId, question, type]);
 }
 
-export function updateSlide(id, question) {
-	return db.updateData("slide", "question", question, "id", id);
+export function updateSlide(id, data) {
+	let { columns, values } = db.columnValue(data);
+	return db.updateData("slide", columns, values, "id", id);
 }
 
 export async function removeSlide(id) {

@@ -48,7 +48,7 @@ router.get("/get", async (req, res) => {
 	run(res, async () => {
 		group.creator = await db.getUser(group.creator);
 		delete group.creator.password;
-		group.members = await db.getGroupMembers(group.name);
+		group.members = await db.getGroupMembers(group.id);
 
 		return group;
 	});
@@ -77,12 +77,7 @@ router.get("/joinedBy", async (req, res) => {
 function sendGroupData(res, groups)
 {
 	return run(res, async () => {
-		for (let group of groups) {
-			group.creator = await db.getUser(group.creator);
-			delete group.creator.password;
-			delete group.creator.username;
-		}
-
+		await db.addCreatorData(groups);
 		return groups;
 	});
 }

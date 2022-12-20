@@ -88,8 +88,9 @@ export function getGroupsUserIn(username) {
 }
 
 export async function addGroup(name, creator) {
-	let result = await db.insertData("userGroup", ["name", "creator", "timeCreated", "inviteId"], [name, creator, Date.now(), uuid()])
-	return db.insertData("groupMember", ["groupId", "user", "timeJoined", "role"], [result.lastID, creator, Date.now(), 1]);
+	let result = await db.insertData("userGroup", ["name", "creator", "timeCreated", "inviteId"], [name, creator, Date.now(), uuid()]);
+	await db.insertData("groupMember", ["groupId", "user", "timeJoined", "role"], [result.lastID, creator, Date.now(), 1]);
+	return result; 
 }
 
 export function updateGroup(groupId, data) {
@@ -129,4 +130,16 @@ export function getToken(compareValue, property = "accessToken") {
  */
 export function removeToken(compareValue, property = "accessToken") {
 	return db.deleteData("token", property, compareValue);
+}
+
+/**
+ * Add creator data to an array of entity data
+ * @param {{ creator: string }[]} entities 
+ */
+export async function addCreatorData(entities) {
+	for (let entity of entities) {
+		entity.creator = await getUser(entity.creator);
+		delete entity.creator.password;
+		delete entity.creator.username;
+	}
 }

@@ -6,7 +6,7 @@ const db = new sqlite.Database("database.db");
 
 db.serialize(() => {
     db.run("PRAGMA foreign_keys = ON");
-	db.all("", log);
+	db.all("SELECT * FROM userGroup", log);
 });
 
 // db.close();
@@ -22,7 +22,10 @@ function log(err, data) {
 	if (err) {
 		console.log(err);
 	}
-	else {
+	else if (data) {
 		console.log(data);
+	}
+	else {
+		console.log(this);
 	}
 }
