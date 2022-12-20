@@ -19,7 +19,7 @@ router.get("/addUser", async (req, res) => {
 		return;
 	}
 
-	let groupMembers = await db.getGroupMembers(group.name);
+	let groupMembers = await db.getGroupMembers(group.id);
 
 	const user = req.user;
 
