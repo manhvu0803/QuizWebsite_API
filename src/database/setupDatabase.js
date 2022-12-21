@@ -20,7 +20,7 @@ db.serialize(() => {
 		name TEXT,
 		creator TEXT,
 		timeCreated INTEGER,
-		inviteId TEXT UNIQUE,
+		inviteId TEXT NOT NULL UNIQUE,
 
 		FOREIGN KEY (creator) REFERENCES user (username)
 	)`, (err) => log(err, "Created table userGroup"));
@@ -34,7 +34,11 @@ db.serialize(() => {
 		avatarUrl TEXT,
 		type INTEGER,
 		active INTEGER
-	)`, log);
+	)`, (err) => log(err, "Created table user"));
+	
+	db.run(`CREATE VIEW userView AS
+			SELECT username, email, displayName, age, avatarUrl, type FROM user`, 
+	(err) => log(err, "Create view userView"));
 
 	db.run(`CREATE TABLE groupMember (
 		groupId INTEGER,
@@ -45,7 +49,7 @@ db.serialize(() => {
 		PRIMARY KEY (groupId, user),
 		FOREIGN KEY (groupId) REFERENCES userGroup (id),
 		FOREIGN KEY (user) REFERENCES user (username)
-	)`, log);
+	)`, (err) => log(err, "Created table groupMember"));
 
 	db.run(`CREATE TABLE token (
 		accessToken TEXT PRIMARY KEY,
@@ -53,17 +57,18 @@ db.serialize(() => {
 		user TEXT,
 
 		FOREIGN KEY (user) REFERENCES user (username)
-	)`, log)
+	)`, (err) => log(err, "Created table token"))
 
 	db.run(`CREATE TABLE presentation (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
 		creator TEXT,
 		timeCreated INTEGER,
+		inviteId TEXT,
 
 		UNIQUE (name, creator),
 		FOREIGN KEY (creator) REFERENCES user (username)
-	)`, log);
+	)`, (err) => log(err, "Created table presentation"));
 
 	db.run(`CREATE TABLE slide (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,7 +78,7 @@ db.serialize(() => {
 		type INTEGER NOT NULL,
 
 		FOREIGN KEY (presentationId) REFERENCES presentation (id)
-	)`, log);
+	)`, (err) => log(err, "Created table slide"));
 
 	db.run(`CREATE TABLE option (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -94,6 +99,15 @@ db.serialize(() => {
 		PRIMARY KEY (optionId, user)
 	)`, log);
 
+	db.run(`CREATE TABLE collaborator (
+		user TEXT,
+		presentationId INTEGER,
+
+		FOREIGN KEY (user) REFERENCES user (username),
+		FOREIGN KEY (presentationId) REFERENCES presentation (id),
+		PRIMARY KEY (presentationId, user)
+	)`)
+
 	let statement = db.prepare("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 	statement.run(["anon", "password1", "anonymous@gmail.com", "Teacher Huy", 30, "", 0, true]);
 	statement.run(["guest", "asdfghjk", "hello1123@yahoo.com", "Guest account", 15, "", 0, true]);
@@ -109,11 +123,16 @@ db.serialize(() => {
 	statement.run([1, "guest", Date.now() - 1000000, 3]);
 	statement.finalize(() => console.log("Inserted into table groupMember"));
 	
-	statement = db.prepare("INSERT INTO presentation (name, creator, timeCreated) VALUES (?, ?, ?)");
-	statement.run(["Hard quiz", "anon", Date.now()]);
-	statement.run(["Easy quiz", "anon", Date.now() + 1000]);
-	statement.run(["Easy quiz", "guest", Date.now() - 10002]);
+	statement = db.prepare("INSERT INTO presentation (name, creator, timeCreated, inviteId) VALUES (?, ?, ?, ?)");
+	statement.run(["Hard quiz", "anon", Date.now(), "123123123"]);
+	statement.run(["Easy quiz", "anon", Date.now() + 1000, "141512"]);
+	statement.run(["Easy quiz", "guest", Date.now() - 10002, "1151232"]);
 	statement.finalize(() => console.log("Inserted into table presentation"));
+	
+	statement = db.prepare("INSERT INTO collaborator VALUES (?, ?)");
+	statement.run(["guest", 1]);
+	statement.finalize((err) => log(err, "Inserted collaborator"));
+
 	
 	statement = db.prepare("INSERT INTO slide (presentationId, question, type) VALUES (?, ?, ?)");
 	statement.run([1, "1 + 1 = ?", 1]);

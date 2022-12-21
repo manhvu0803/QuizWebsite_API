@@ -1,6 +1,7 @@
 import { SlideType } from "../define.mjs";
 import * as db from "./database.mjs"
 import { addCreatorData } from "./userDatabase.mjs";
+import { v4 as uuid } from "uuid";
 
 /**
  * @typedef {Object} slide
@@ -28,12 +29,18 @@ export async function getPresentationsOf(creator) {
 	return data;
 }
 
-export function getPresentation(id) {
-	return db.getData("presentation", "id", id);
+/**
+ * 
+ * @param {any} compareValue 
+ * @param {"id" | "inviteId"} column Default is "id" 
+ * @returns 
+ */
+export function getPresentation(compareValue, column = "id") {
+	return db.getData("presentation", column, compareValue);
 }
 
 export function addPresentation(name, creator) {
-	return db.insertData("presentation", ["name", "creator", "timeCreated"], [name, creator, Date.now()]);
+	return db.insertData("presentation", ["name", "creator", "timeCreated", "inviteId"], [name, creator, Date.now(), uuid()]);
 }
 
 export function updatePresentation(id, data) {
@@ -44,6 +51,26 @@ export function updatePresentation(id, data) {
 export async function removePresentation(id) {
 	await removeSlidesOf(id);
 	return db.deleteData("presentation", "id", id);
+}
+
+export async function addCollaborator(inviteId, username) {
+	let presentation = await getPresentation(inviteId, "inviteId")
+	if (!presentation) {
+		throw new Error("Invalid invite ID");
+	}
+
+	return db.upsertData("collaborator", ["presentationId", "user"], [presentation.id, username], ["presentationId", "user"], [presentation.id, username]);
+}
+
+export function getCollaborator(presentationId) {
+	let query = `SELECT user.*
+	             FROM user INNER JOIN collaborator ON user.username = collaborator.user
+				 WHERE collaborator.presentationId = ?`;
+	return db.all(query, presentationId);
+}
+
+export function removeCollaborator(presentationId, username) {
+	return db.deleteData("collaborator", ["presentationId", "user"], [presentationId, username]);
 }
 
 /**
@@ -91,9 +118,9 @@ export function getOption(id) {
 
 export function getOptionsOf(slideId) {
 	let query = `SELECT option.*, COUNT(answer.optionId) as answerAmount 
-					FROM option LEFT JOIN answer ON option.id = answer.optionId
-					WHERE option.slideId = ${slideId}
-					GROUP BY option.id`;
+	             FROM option LEFT JOIN answer ON option.id = answer.optionId
+	             WHERE option.slideId = ${slideId}
+	             GROUP BY option.id`;
 	return db.all(query);
 }
 

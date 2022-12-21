@@ -3,14 +3,32 @@ import sqlite from "sqlite3";
 const db = new sqlite.Database("database.db");
 db.run("PRAGMA foreign_keys = ON", () => console.log("Database is ready"));
 
+/**
+ * @param {string} table 
+ * @param {string | string[]} columns 
+ * @param {any | []} compareValues 
+ * @returns {Promise}
+ */
 export function getData(table, columns, compareValues) {
 	return get(queryString(table, columns, compareValues));
 }
 
+/**
+ * @param {string} table 
+ * @param {string | string[]} columns 
+ * @param {any | any[]} compareValues 
+ * @returns {Promise}
+ */
 export function getAllData(table, columns, compareValues) {
 	return all(queryString(table, columns, compareValues));
 }
 
+/**
+ * @param {string} table 
+ * @param {string | string[]} columns 
+ * @param {any | any[]} compareValues 
+ * @returns {Promise}
+ */
 export function insertData(table, columns, values) {
 	let string = `'${values[0]}'`;
 
@@ -24,7 +42,7 @@ export function insertData(table, columns, values) {
 /**
  * @param {string} table 
  * @param {string | string[]} columns 
- * @param {any | []} compareValues 
+ * @param {any | any[]} compareValues 
  * @returns {Promise}
  */
 export function deleteData(table, columns, compareValues) {
@@ -53,9 +71,9 @@ export function upsertData(table, columns, values, compareColumns, compareValues
 	}
 
 	let string = `INSERT INTO ${table} (${columns.join(", ")}) VALUES (${valueString})
-				  ON CONFLICT(*)
-				  DO UPDATE ${table} SET ${columnValueString(columns, values, ",")}
-		 		  WHERE ${columnValueString(compareColumns, compareValues)}`;
+	              ON CONFLICT
+	              DO UPDATE SET ${columnValueString(columns, values, ",")}
+	              WHERE ${columnValueString(compareColumns, compareValues)}`;
 
 	return run(string);
 }

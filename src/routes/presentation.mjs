@@ -1,7 +1,7 @@
 import express, { query } from "express";
 import * as db from "../database/questionDatabase.mjs";
 import { SlideType } from "../define.mjs";
-import { sendData, sendError, resolve, run, getUsername, getGroupId } from "./routeUtils.mjs";
+import { resolve, run, getUsername } from "./routeUtils.mjs";
 
 const router = express.Router();
 
@@ -47,6 +47,20 @@ router.get("/update", (req, res) => {
 router.get("/delete", (req, res) => {
     resolve(res, db.removePresentation(getPresentationId(req.query) ?? req.query.id));
 })
+
+router.get("/addCollaborator", (req, res) => {
+    let query = req.query;
+    resolve(res, db.addCollaborator(query.inviteId ?? query.inviteid ?? query.inviteID, req.query.username));
+})
+
+router.get("/getCollaborator", (req, res) => {
+    resolve(res, db.getCollaborator(getPresentationId(req.query)));
+})
+
+router.get("/deleteCollaborator", (req, res) => {
+    let query = req.query;
+    resolve(res, db.removeCollaborator(getPresentationId(query), getUsername(query)));
+}) 
 
 router.get("/addSlide", async (req, res) => {
     let query = req.query;
@@ -155,7 +169,7 @@ function getSlideId(query) {
 }
 
 function getSlideType(query) {
-    return query.slideType ?? query.slidetype;
+    return query.slideType ?? query.slidetype ?? query.type;
 }
 
 function getOptionText(query) {
