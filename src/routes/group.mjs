@@ -43,7 +43,7 @@ router.get("/get", async (req, res) => {
 		sendError(res, "Group doesn't exist")
 		return;
 	}
-	
+
 	run(res, async () => {
 		group.creator = await db.getUser(group.creator);
 		delete group.creator.password;
@@ -94,9 +94,17 @@ router.get("/invite", async (req, res) => {
 	}
 
 	let user = await db.getUser(receiver);
+	let senderData = await db.getUser(sender);
 
 	if (!user) {
 		sendError(res, "User doesn't exist!");
+        return;
+	}
+
+	let group = await db.getGroup(groupId);
+
+	if(!group){
+		sendError(res, "Group doesn't exist!");
         return;
 	}
 
@@ -107,13 +115,11 @@ router.get("/invite", async (req, res) => {
 		return;
 	}
 
-	let group = await db.getGroup(groupId);
-
 	run(res, async () => {
 		await sendInviteEmail({
-			toUser: { email: user.email, username: user.username }, 
-			inviter: sender, 
-			groupname: group.name, 
+			toUser: { email: user.email, username: user.username },
+			inviter: senderData.displayName,
+			groupname: group.name,
 			inviteId: group.inviteId
 		});
 
