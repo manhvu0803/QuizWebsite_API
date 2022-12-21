@@ -20,18 +20,14 @@ router.get("/addUser", async (req, res) => {
 	}
 
 	let groupMembers = await db.getGroupMembers(group.id);
+	let user = req.user;
 
-	const user = req.user;
-
-	let currentUsername = user.username;
-	for (let member of groupMembers) {
-		if (member.username == currentUsername || member.email == user.email) {
-			sendError(res, "User is already in group");
-			return;
-		}
+	if (groupMembers.find(member => member.username == user.username)) {
+		sendError(res, "User is already in group");
+		return;
 	}
 
-	resolve(res, db.addGroupMember(group.name, currentUsername));
+	resolve(res, db.addGroupMember(group.id, user.username));
 })
 
 router.get("/get", async (req, res) => {
