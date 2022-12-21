@@ -37,7 +37,6 @@ router.get("/addUser", async (req, res) => {
 router.get("/get", async (req, res) => {
 	let query = req.query;
 	let groupId = getGroupId(query) ?? query.id;
-
 	let group = await db.getGroup(groupId);
 
 	if (!group) {
@@ -87,7 +86,6 @@ router.get("/invite", async (req, res) => {
 
 	let sender = query.sender;
 	let receiver = query.receiver;
-	let inviteId = query.inviteId ?? query.inviteid ?? query.inviteID;
 	let groupId = getGroupId(query) ?? query.id;
 
 	if (!sender && !receiver && !groupId) {
@@ -109,12 +107,14 @@ router.get("/invite", async (req, res) => {
 		return;
 	}
 
+	let group = await db.getGroup(groupId);
+
 	run(res, async () => {
 		await sendInviteEmail({
 			toUser: { email: user.email, username: user.username }, 
 			inviter: sender, 
-			groupname: groupId, 
-			inviteId: inviteId
+			groupname: group.name, 
+			inviteId: group.inviteId
 		});
 
 		return "Invitation sent";
