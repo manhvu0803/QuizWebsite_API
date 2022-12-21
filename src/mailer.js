@@ -13,13 +13,20 @@ const transporter = nodemailer.createTransport({
 
 exports.sendConfirmationEmail = function({toUser, hash}) {
     return new Promise((res, rej) => {
+        let username;
+        if(toUser.username.match('/^[0-9]+$/') === null && toUser.displayName != null){
+            username = toUser.displayName
+        }
+        else{
+            username = toUser.username
+        }
 
         const message = {
             from: process.env.GoogleUser,
             to: toUser.email,
             subject: "Let's play - Activate Account",
             html: `
-                <h3> Hello ${toUser.username}</h3>
+                <h3> Hello ${username}</h3>
                 <p> Thanks for your regitering into our application. Just one more step ... </p>
                 <p> To activate your account, please follow this link: <a target="_" href="http://localhost:3000/activate_account/${toUser.username}">Activate link</a> </p>
                 <p>Let's play</p>
@@ -41,14 +48,57 @@ exports.sendConfirmationEmail = function({toUser, hash}) {
 exports.sendInviteEmail = function({toUser, inviter, groupname, inviteId}) {
     return new Promise((res, rej) => {
 
+        let username;
+        if(toUser.username.match('/^[0-9]+$/') === null && toUser.displayName != null){
+            username = toUser.displayName
+        }
+        else{
+            username = toUser.username
+        }
+
         const message = {
             from: process.env.GoogleUser,
             to: toUser.email,
             subject: "Let's play - Invitation",
             html: `
-                <h3> Hello ${toUser.username}</h3>
+                <h3> Hello ${username}</h3>
                 <p> ${inviter} invite you to join group: ${groupname} </p>
                 <p> To join, please follow this link: <a target="_" href="http://localhost:3000/invite/${inviteId}">${groupname}</a> </p>
+                <p>Let's play</p>
+            `
+        }
+
+        transporter.sendMail(message, function(err, info){
+
+            if(err){
+                rej(err)
+            }
+            else{
+                res(info);
+            }
+        })
+    })
+}
+
+
+exports.sendResetEmail = function(toUser, newPass) {
+    return new Promise((res, rej) => {
+
+        let username;
+        if(toUser.username.match('/^[0-9]+$/') === null && toUser.displayName != null){
+            username = toUser.displayName
+        }
+        else{
+            username = toUser.username
+        }
+
+        const message = {
+            from: process.env.GoogleUser,
+            to: toUser.email,
+            subject: "Let's play - Reset Email",
+            html: `
+                <h3> Hello, ${username}</h3>
+                <p> Your new password: <b>${newPass}</b> </p>
                 <p>Let's play</p>
             `
         }

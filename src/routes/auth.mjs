@@ -5,7 +5,8 @@ import { OAuth2Client } from "google-auth-library";
 import * as db from "../database/userDatabase.mjs";
 import { v4 } from "uuid"
 import { getClientId, getUsername, sendData, sendError, getAvatarUrl, getDisplayName } from "./routeUtils.mjs"
-import { sendConfirmationEmail } from "../mailer.js";
+import { sendConfirmationEmail, sendResetEmail } from "../mailer.js";
+import RandExp from "randexp";
 
 const GoogleClientID = process.env.GoogleClientID;
 
@@ -243,13 +244,13 @@ router.get("/login", async (req, res) => {
         return;
     }
 
-    if(user.active === 0){
-        res.status(400).json({
-            success: false,
-            isActive: false
-        })
-        return;
-    }
+    // if(user.active === 0){
+    //     res.status(400).json({
+    //         success: false,
+    //         isActive: false
+    //     })
+    //     return;
+    // }
 
     token = await db.getToken(getClientId(query), "clientId");
 
@@ -300,5 +301,61 @@ router.get("/active", async (req, res) => {
 	}
 
 })
+
+// router.get("/reset", async (req, res) => {
+//     let query = req.query;
+
+//     let user = null;
+//     let username = getUsername(query);
+//     if (username) {
+//         user = await db.getUser(username);
+//     }
+//     else{
+//         sendError(res, "Cannot Reset password");
+//         return;
+//     }
+
+//     if(!user){
+//         sendError(res, "Error!");
+//         return;
+//     }
+
+//     sendData(res, "Email sent!");
+// });
+
+router.get("/resetPass", async (req, res) => {
+    let query = req.query;
+
+    let user = null;
+    let username = getUsername(query);
+    // let password = req.query.password;
+
+    if (username) {
+        user = await db.getUser(username);
+    }
+    else{
+        sendError(res, "Cannot Reset password");
+        return;
+    }
+
+    if(!user){
+        sendError(res, "Error!");
+        return;
+    }
+
+    try {
+        let pattern = /^(?=.*[0-9])(?=.*[!@#$%^&*.,])[a-zA-Z0-9!@#$%^&*.,]{8,10}$/;
+        let password = null;
+        while(!pattern.test(password)){
+            password = new RandExp(pattern).gen()
+        }
+		await db.updateUser(query.username, {password: password})
+        await sendResetEmail(user, password);
+        sendData(res, "success");
+	}
+	catch (err) {
+        sendError(res, err);
+	}
+});
 
 export default router;
