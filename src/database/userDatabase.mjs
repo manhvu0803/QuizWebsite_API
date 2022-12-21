@@ -140,6 +140,5 @@ export async function addCreatorData(entities) {
 	for (let entity of entities) {
 		entity.creator = await getUser(entity.creator);
 		delete entity.creator.password;
-		delete entity.creator.username;
 	}
 }
