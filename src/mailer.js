@@ -63,7 +63,7 @@ exports.sendInviteEmail = function({toUser, inviter, groupname, inviteId}) {
             html: `
                 <h3> Hello ${username}</h3>
                 <p> ${inviter} invite you to join group: ${groupname} </p>
-                <p> To join, please follow this link: <a target="_" href="http://localhost:3000/invite/${inviteId}">${groupname}</a> </p>
+                <p> To join, please follow this link: <a target="_" href="http://localhost:3000/group/invite/${inviteId}">${groupname}</a> </p>
                 <p>Let's play</p>
             `
         }

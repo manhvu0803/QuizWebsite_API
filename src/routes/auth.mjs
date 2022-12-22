@@ -299,7 +299,33 @@ router.get("/active", async (req, res) => {
 	catch (err) {
         sendError(res, err);
 	}
+})
 
+router.get("/active_email", async (req, res) => {
+    let query = req.query;
+
+    let user = null;
+    let username = getUsername(query);
+    if (username) {
+        user = await db.getUser(username);
+    }
+    else{
+        sendError(res, "Cannot activate!");
+        return;
+    }
+
+    if(!user){
+        sendError(res, "Error!");
+        return;
+    }
+
+    try {
+		await sendConfirmationEmail({toUser: {email: user.email, username: username}, hash: token});
+        sendData(res, "Email sent");
+	}
+	catch (err) {
+        sendError(res, err);
+	}
 })
 
 // router.get("/reset", async (req, res) => {
