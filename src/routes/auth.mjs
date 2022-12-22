@@ -168,18 +168,18 @@ router.get("/register", async (req, res) => {
             active: 0
         });
 
-        let clientId = getClientId(query);
-        let token = await db.getToken(clientId, "clientId");
+        // let clientId = getClientId(query);
+        // let token = await db.getToken(clientId, "clientId");
 
-        if (!token) {
-            token = random();
-        }
+        // if (!token) {
+        //     token = random();
+        // }
 
-        await db.addToken(token, clientId, username);
+        // await db.addToken(token, clientId, username);
 
-        await sendConfirmationEmail({toUser: {email: query.email, username: username}, hash: token});
+        await sendConfirmationEmail({toUser: {email: query.email, username: username}, hash: null});
 
-        sendData(res, { token });
+        sendData(res, "success");
     }
     catch (err) {
         sendError(res, err);
