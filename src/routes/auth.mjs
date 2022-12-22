@@ -320,7 +320,7 @@ router.get("/active_email", async (req, res) => {
     }
 
     try {
-		await sendConfirmationEmail({toUser: {email: user.email, username: username}, hash: token});
+		await sendConfirmationEmail({toUser: {email: user.email, username: username}, hash: null});
         sendData(res, "Email sent");
 	}
 	catch (err) {
