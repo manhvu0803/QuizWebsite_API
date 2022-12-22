@@ -50,7 +50,13 @@ router.get("/delete", (req, res) => {
 
 router.get("/addCollaborator", (req, res) => {
     let query = req.query;
-    resolve(res, db.addCollaborator(query.inviteId ?? query.inviteid ?? query.inviteID, req.query.username));
+    let inviteId = query.inviteId ?? query.inviteid ?? query.inviteID;
+
+    resolve(res, async () => {
+        await db.addCollaborator(inviteId, req.query.username);
+        let presentation = await db.getPresentation(inviteId);
+        return presentation.id;
+    });
 })
 
 router.get("/getCollaborator", (req, res) => {

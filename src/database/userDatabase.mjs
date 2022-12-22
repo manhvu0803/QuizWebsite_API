@@ -103,7 +103,7 @@ export function addGroupMember(groupId, username, role = 3) {
 }
 
 export function updateGroupMember(groupId, username, role) {
-	return db.updateData("groupMember", ["groupId", "user"], [groupId, username], "role", role);
+	return db.updateData("groupMember", "role", role, ["groupId", "user"], [groupId, username]);
 }
 
 export function removeGroupMember(groupId, username) {

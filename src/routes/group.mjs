@@ -27,7 +27,10 @@ router.get("/addUser", async (req, res) => {
 		return;
 	}
 
-	resolve(res, db.addGroupMember(group.id, user.username));
+	run(res, async () => {
+		await db.addGroupMember(group.id, user.username);
+		return group.id;
+	});
 })
 
 router.get("/get", async (req, res) => {
