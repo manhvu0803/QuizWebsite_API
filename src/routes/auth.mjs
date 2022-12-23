@@ -168,18 +168,18 @@ router.get("/register", async (req, res) => {
             active: 0
         });
 
-        let clientId = getClientId(query);
-        let token = await db.getToken(clientId, "clientId");
+        // let clientId = getClientId(query);
+        // let token = await db.getToken(clientId, "clientId");
 
-        if (!token) {
-            token = random();
-        }
+        // if (!token) {
+        //     token = random();
+        // }
 
-        await db.addToken(token, clientId, username);
+        // await db.addToken(token, clientId, username);
 
-        await sendConfirmationEmail({toUser: {email: query.email, username: username}, hash: token});
+        await sendConfirmationEmail({toUser: {email: query.email, username: username}, hash: null});
 
-        sendData(res, { token });
+        sendData(res, "success");
     }
     catch (err) {
         sendError(res, err);
@@ -299,7 +299,33 @@ router.get("/active", async (req, res) => {
 	catch (err) {
         sendError(res, err);
 	}
+})
 
+router.get("/active_email", async (req, res) => {
+    let query = req.query;
+
+    let user = null;
+    let username = getUsername(query);
+    if (username) {
+        user = await db.getUser(username);
+    }
+    else{
+        sendError(res, "Cannot activate!");
+        return;
+    }
+
+    if(!user){
+        sendError(res, "Error!");
+        return;
+    }
+
+    try {
+		await sendConfirmationEmail({toUser: {email: user.email, username: username}, hash: null});
+        sendData(res, "Email sent");
+	}
+	catch (err) {
+        sendError(res, err);
+	}
 })
 
 // router.get("/reset", async (req, res) => {
