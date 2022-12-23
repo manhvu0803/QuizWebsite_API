@@ -98,6 +98,11 @@ export function updateGroup(groupId, data) {
 	return db.updateData("userGroup", columns, values, "id", groupId);
 }
 
+export async function deleteGroup(groupId) {
+	await db.deleteData("groupMember", "groupId", groupId);
+	return db.deleteData("userGroup", "id", groupId);
+}
+
 export function addGroupMember(groupId, username, role = 3) {
 	return db.insertData("groupMember", ["groupId", "user", "timeJoined", "role"], [groupId, username, Date.now(), role]);
 }

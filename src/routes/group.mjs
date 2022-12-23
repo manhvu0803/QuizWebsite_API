@@ -52,6 +52,10 @@ router.get("/get", async (req, res) => {
 	});
 })
 
+router.get("/delete", (req, res) => {
+	resolve(res, db.deleteGroup(getGroupId(req.query)));
+})
+
 router.get("/kickUser", async (req, res) => {
 	let query = req.query;
 	await resolve(res, db.removeGroupMember(getGroupId(query) ?? query.id, getUsername(query)));
