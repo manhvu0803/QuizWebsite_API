@@ -29,7 +29,7 @@ router.get("/addUser", async (req, res) => {
 
 	run(res, async () => {
 		await db.addGroupMember(group.id, user.username);
-		return group.id;
+		return group;
 	});
 })
 

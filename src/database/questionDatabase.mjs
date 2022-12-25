@@ -25,7 +25,16 @@ import { v4 as uuid } from "uuid";
  */
 export async function getPresentationsOf(creator) {
 	let data = await db.getAllData("presentation", "creator", creator);
-	await addCreatorData(data);
+	return data;
+}
+
+/**
+ * Get all the presentations of a user
+ * @param {string} collaborator collaborator username
+ * @returns {Promise<presentation[]>} array of presentations
+ */
+export async function getPresentationsByCollaborator(collaborator) {
+	let data = await db.getAllData("presentation", "collaborator", collaborator);
 	return data;
 }
 
@@ -53,7 +62,11 @@ export async function removePresentation(id) {
 	return db.deleteData("presentation", "id", id);
 }
 
-export async function addCollaborator(inviteId, username) {
+export async function addCollaborator(presentationId, username) {
+	return db.insertData("collaborator", ["presentationId", "user"], [presentation.id, username], "presentationId", presentationId);
+}
+
+export async function addInvitedCollaborator(inviteId, username) {
 	let presentation = await getPresentation(inviteId, "inviteId")
 	if (!presentation) {
 		throw new Error("Invalid invite ID");
@@ -62,7 +75,7 @@ export async function addCollaborator(inviteId, username) {
 	return db.upsertData("collaborator", ["presentationId", "user"], [presentation.id, username], ["presentationId", "user"], [presentation.id, username]);
 }
 
-export function getCollaborator(presentationId) {
+export function getCollaborators(presentationId) {
 	let query = `SELECT user.*
 	             FROM user INNER JOIN collaborator ON user.username = collaborator.user
 				 WHERE collaborator.presentationId = ?`;

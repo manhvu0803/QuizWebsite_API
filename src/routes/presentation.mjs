@@ -14,25 +14,27 @@ router.get("/create", async (req, res) => {
 })
 
 router.get("/get", (req, res) => {
-    let id = getPresentationId(req.query) ?? req.query.id;
-    if (id) {
-        run(res, async () => {
-            let presentation = await db.getPresentation(id);
-            presentation.slides = await db.getSlidesOf(id);
+    let query = req.query;
+    let id = getPresentationId(query) ?? query.id;
+    
+    run(res, async () => {
+        let presentation = await db.getPresentation(id);
+        presentation.slides = await db.getSlidesOf(id);
 
-            return presentation;
-        });
+        return presentation;
+    });
+})
 
-        return;
-    }
+router.get("/getByCreator", (req, res) => {
+    let query = req.query;
+    let creator = getUsername(query) ?? query.creator ?? req.user.username;
+    resolve(res, db.getPresentationsOf(creator));
+})
 
-    let username = getUsername(req.query);
-    if (username) {
-        resolve(res, db.getPresentationsOf(username));
-    }
-    else {
-        resolve(res, db.getPresentationsOf(req.user.username));
-    }
+router.get("getByCollab", (req, res) => {
+    let query = req.query;
+    let collaborator = getUsername(query) ?? query.collaborator ?? req.user.username;
+    resolve(res, db.getPresentationsByCollaborator(collaborator));
 })
 
 router.get("/update", (req, res) => {
@@ -52,15 +54,16 @@ router.get("/addCollaborator", (req, res) => {
     let query = req.query;
     let inviteId = query.inviteId ?? query.inviteid ?? query.inviteID;
 
-    resolve(res, async () => {
-        await db.addCollaborator(inviteId, req.query.username);
-        let presentation = await db.getPresentation(inviteId);
-        return presentation.id;
+    run(res, async () => {
+        await db.addInvitedCollaborator(inviteId, req.query.username);
+        let presentation = await db.getPresentation(inviteId, "inviteId");
+        console.log(presentation);
+        return presentation;
     });
 })
 
 router.get("/getCollaborator", (req, res) => {
-    resolve(res, db.getCollaborator(getPresentationId(req.query)));
+    resolve(res, db.getCollaborators(getPresentationId(req.query)));
 })
 
 router.get("/deleteCollaborator", (req, res) => {
