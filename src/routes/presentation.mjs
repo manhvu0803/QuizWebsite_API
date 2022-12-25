@@ -32,7 +32,7 @@ router.get("/getByCreator", (req, res) => {
     resolve(res, db.getPresentationsOf(creator));
 })
 
-router.get("getByCollab", (req, res) => {
+router.get("/getByCollab", (req, res) => {
     let query = req.query;
     let collaborator = getUsername(query) ?? query.collaborator ?? req.user.username;
     resolve(res, db.getPresentationsByCollaborator(collaborator));
