@@ -23,7 +23,7 @@ router.get("/get", (req, res) => {
     run(res, async () => {
         let presentation = await db.getPresentation(id);
         presentation.slides = await db.getSlidesOf(id);
-        presentation.creator = await getUser(creator);
+        presentation.creator = await getUser(presentation.creator);
         delete presentation.creator.password;
         return presentation;
     });
