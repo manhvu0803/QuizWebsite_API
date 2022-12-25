@@ -173,7 +173,7 @@ router.get("/invite", validateEmail, async (req, res) => {
         return;
 	}
 
-    let presentation = await db.getPresentation(id);
+    let presentation = await db.getPresentation(presentId);
 
     if(!presentation){
         sendError(res, "Present doesn't exist!");
