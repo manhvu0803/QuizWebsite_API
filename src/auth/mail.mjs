@@ -1,4 +1,5 @@
 import * as db from "../database/userDatabase.mjs";
+import { sendError } from "./routeUtils.mjs";
 
 export default async function validateEmail(req, res, next){
     let query = req.query;
