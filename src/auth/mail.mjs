@@ -17,8 +17,8 @@ export default async function validateEmail(req, res, next){
 		sendError(res, "User doesn't exist!");
         return;
 	}
-
-    req.receiver = user;
-
-    next();
+	else{
+		req.receiver = user;
+		next();
+	}
 }

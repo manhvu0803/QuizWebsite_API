@@ -184,7 +184,7 @@ router.get("/invite", validateEmail, async (req, res) => {
         return;
     }
 
-	let collabs = await db.getCollaborators(getPresentationName(req.presentataion))
+	let collabs = await db.getCollaborators(presentId)
 	if (collabs.find(({username}) => username === req.receiver.username) !== undefined) {
 		sendError(res, "User has already be a collaborator!");
 		return;
