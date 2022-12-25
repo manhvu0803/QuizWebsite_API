@@ -1,5 +1,6 @@
 import "express";
 import * as db from "../database/userDatabase.mjs";
+import { sendError } from "../routes/routeUtils.mjs";
 
 export default async function (req, res, next){
     try {
