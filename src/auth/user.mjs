@@ -13,5 +13,4 @@ export default async function (req, res, next){
     catch (error) {
         sendError(res, error);
     }
-
 }
