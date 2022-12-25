@@ -1,7 +1,8 @@
 import express, { query } from "express";
 import * as db from "../database/questionDatabase.mjs";
 import { SlideType } from "../define.mjs";
-import { resolve, run, getUsername } from "./routeUtils.mjs";
+import { resolve, run, getUsername, sendError } from "./routeUtils.mjs";
+import { sendCollabEmail } from "../mailer.js";
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get("/create", async (req, res) => {
 router.get("/get", (req, res) => {
     let query = req.query;
     let id = getPresentationId(query) ?? query.id;
-    
+
     run(res, async () => {
         let presentation = await db.getPresentation(id);
         presentation.slides = await db.getSlidesOf(id);
@@ -69,7 +70,7 @@ router.get("/getCollaborator", (req, res) => {
 router.get("/deleteCollaborator", (req, res) => {
     let query = req.query;
     resolve(res, db.removeCollaborator(getPresentationId(query), getUsername(query)));
-}) 
+})
 
 router.get("/addSlide", async (req, res) => {
     let query = req.query;
@@ -89,7 +90,7 @@ async function addSlide(presentationId, type = SlideType.MultipleChoice) {
         await db.addOption(result.lastID, "Answer 1", true);
         await db.addOption(result.lastID, "Answer 2", false);
     }
-    
+
     return result;
 }
 
@@ -144,7 +145,7 @@ router.get("/addOption", async (req, res) => {
     run(res, async () => {
         let result = await db.addOption(getSlideId(query), getOptionText(query), getCorrect(query));
         let option = await db.getOption(result.lastID);
-        
+
         return option;
     });
 })
@@ -161,6 +162,49 @@ router.get("/updateOption", (req, res) => {
 
 router.get("/deleteOption", (req, res) => {
     resolve(res, db.removeOptions(getOptionId(req.query) ?? query.id));
+})
+
+router.get("/invite", async (req, res) => {
+	let query = req.query;
+
+	let receiver = query.receiver;
+	let presentId = getPresentationId(query) ?? query.id;
+
+	if (!receiver && !presentId) {
+		sendError(res, "Missing data!");
+        return;
+	}
+
+	let user = await db.getUser(receiver);
+    let presentation = await db.getPresentation(id);
+
+	if (!user) {
+		sendError(res, "User doesn't exist!");
+        return;
+	}
+
+    if(!presentation){
+        sendError(res, "Present doesn't exist!");
+        return;
+    }
+
+	let collabs = await db.getCollaborators(presentId)
+
+	if (collabs.find(({username}) => username === receiver) !== undefined) {
+		sendError(res, "User has already be a collaborator!");
+		return;
+	}
+
+	run(res, async () => {
+		await sendInviteEmail({
+			toUser: user,
+			inviter: req.user.displayName,
+			presentname: presentation.name,
+			inviteId: presentation.inviteId
+		});
+
+		return "Invitation sent";
+	})
 })
 
 export default router;
