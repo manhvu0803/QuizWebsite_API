@@ -4,7 +4,7 @@ import { SlideType } from "../define.mjs";
 import { resolve, run, getUsername, sendError } from "./routeUtils.mjs";
 import { sendCollabEmail } from "../mailer.js";
 import validateEmail from "../auth/mail.mjs";
-import { addCreatorData } from "../database/userDatabase.mjs";
+import { addCreatorData, getUser } from "../database/userDatabase.mjs";
 
 const router = express.Router();
 
@@ -23,7 +23,8 @@ router.get("/get", (req, res) => {
     run(res, async () => {
         let presentation = await db.getPresentation(id);
         presentation.slides = await db.getSlidesOf(id);
-
+        presentation.creator = await getUser(creator);
+        delete presentation.creator.password;
         return presentation;
     });
 })

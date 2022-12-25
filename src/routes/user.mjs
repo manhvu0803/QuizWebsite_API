@@ -28,7 +28,6 @@ router.get("/edit", async (req, res) => {
 })
 
 router.get("/logout", async (req, res) => {
-
     let clientId = req.clientId;
 
     if (!clientId) {
@@ -37,6 +36,10 @@ router.get("/logout", async (req, res) => {
     }
 
     resolve(res, db.removeToken(req.clientId, "clientId"));
+})
+
+router.get("/checkPassword", async (req, res) => {
+    res.send({ isCorrect: req.query.password == req.user.password });
 })
 
 router.get("/test", (req, res) => {
