@@ -22,6 +22,10 @@ export function getGroupId(query) {
 	return query.groupId ?? query.groupID ?? query.groupid;
 }
 
+export function getOptionId(query) {
+    return query.optionId ?? query.optionid ?? query.optionID;
+}
+
 export async function run(res, callback) {
 	return resolve(res, callback());
 }

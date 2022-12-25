@@ -6,13 +6,15 @@ const db = new sqlite.Database("database.db");
 
 db.serialize(() => {
     db.run("PRAGMA foreign_keys = ON");
-	db.all("SELECT * FROM userGroup", log);
+	db.all(`SELECT p.* FROM
+	presentation p JOIN collaborator c ON p.id = c.presentationId
+	WHERE c.user = (?)`, "guest", log);
 });
 
-// db.close();
+// // db.close();
 
 // async function func() {
-// 	let data = await db.addSlide(1, "hello")
+// 	let data = await db.getCollaborators(2);
 // 	console.log(data);
 // };
 

@@ -1,14 +1,13 @@
-import { Server } from "socket.io";
 import { Router } from "express";
 import * as db from "../database/questionDatabase.mjs";
-import { run, sendError } from "./routeUtils.mjs";
+import { getOptionId, run, sendError } from "./routeUtils.mjs";
 
 var socket;
 
 const router = Router();
 
 router.get("/answer", async (req, res) => {
-    let option = db.getOption(req.query.optionId);
+    let option = await db.getOption(getOptionId(req.query));
     if (!option) {
         sendError(res, "Option doesn't exists");
         return;

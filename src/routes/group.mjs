@@ -5,32 +5,9 @@ import { sendInviteEmail } from "../mailer.js";
 
 const router = express.Router();
 
+//#region group
 router.get("/create", async (req, res) => {
 	resolve(res, db.addGroup(getGroupName(req.query), req.user.username));
-})
-
-router.get("/addUser", async (req, res) => {
-	let query = req.query;
-
-	let group = await db.getGroup(getInviteId(query), "inviteId");
-
-	if (!group) {
-		sendError(res, "Inivte ID doesn't exist");
-		return;
-	}
-
-	let groupMembers = await db.getGroupMembers(group.id);
-	let user = req.user;
-
-	if (groupMembers.find(member => member.username == user.username)) {
-		sendError(res, "User is already in group");
-		return;
-	}
-
-	run(res, async () => {
-		await db.addGroupMember(group.id, user.username);
-		return group;
-	});
 })
 
 router.get("/get", async (req, res) => {
@@ -54,6 +31,32 @@ router.get("/get", async (req, res) => {
 
 router.get("/delete", (req, res) => {
 	resolve(res, db.deleteGroup(getGroupId(req.query)));
+})
+//#endregion
+
+//#region user
+router.get("/addUser", async (req, res) => {
+	let query = req.query;
+
+	let group = await db.getGroup(getInviteId(query), "inviteId");
+
+	if (!group) {
+		sendError(res, "Inivte ID doesn't exist");
+		return;
+	}
+
+	let groupMembers = await db.getGroupMembers(group.id);
+	let user = req.user;
+
+	if (groupMembers.find(member => member.username == user.username)) {
+		sendError(res, "User is already in group");
+		return;
+	}
+
+	run(res, async () => {
+		await db.addGroupMember(group.id, user.username);
+		return group;
+	});
 })
 
 router.get("/kickUser", async (req, res) => {
@@ -129,11 +132,7 @@ router.get("/invite", async (req, res) => {
 		return "Invitation sent";
 	})
 })
-
-router.get("/test", (req, res) => {
-    console.log(req.user);
-    res.status(200).json(req.user);
-})
+//#endregion
 
 export default router;
 

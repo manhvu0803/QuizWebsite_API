@@ -34,8 +34,14 @@ export async function getPresentationsOf(creator) {
  * @returns {Promise<presentation[]>} array of presentations
  */
 export async function getPresentationsByCollaborator(collaborator) {
-	let data = await db.getAllData("presentation", "collaborator", collaborator);
-	return data;
+	let query = `SELECT p.* FROM
+	             presentation p JOIN collaborator c ON p.id = c.presentationId
+				 WHERE c.user = (?)`;
+	
+	let presentations = await db.all(query, collaborator);
+	await addCreatorData(presentations);
+
+	return presentations;
 }
 
 /**
@@ -173,7 +179,7 @@ export function getAnswersOf(username, slideId) {
 }
 
 export function addAnswer(username, optionId) {
-	return db.insertData("answer", ["user", "optionId", "timeAnswerd"], [username, optionId, Date.now()]);
+	return db.upsertData("answer", ["user", "optionId", "timeAnswered"], [username, optionId, Date.now()], ["user", "optionId"], [username, optionId]);
 }
 
 export function removeAnswer(username, optionId) {

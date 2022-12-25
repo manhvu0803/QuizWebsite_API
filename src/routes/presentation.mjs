@@ -1,10 +1,11 @@
 import express, { query } from "express";
 import * as db from "../database/questionDatabase.mjs";
 import { SlideType } from "../define.mjs";
-import { resolve, run, getUsername } from "./routeUtils.mjs";
+import { resolve, run, getUsername, getOptionId } from "./routeUtils.mjs";
 
 const router = express.Router();
 
+//#region presentation
 router.get("/create", async (req, res) => {
     run(res, async () => {
         let result = await db.addPresentation(getPresentationName(req.query), req.user.username);
@@ -31,7 +32,7 @@ router.get("/getByCreator", (req, res) => {
     resolve(res, db.getPresentationsOf(creator));
 })
 
-router.get("getByCollab", (req, res) => {
+router.get("/getByCollab", (req, res) => {
     let query = req.query;
     let collaborator = getUsername(query) ?? query.collaborator ?? req.user.username;
     resolve(res, db.getPresentationsByCollaborator(collaborator));
@@ -49,7 +50,9 @@ router.get("/update", (req, res) => {
 router.get("/delete", (req, res) => {
     resolve(res, db.removePresentation(getPresentationId(req.query) ?? req.query.id));
 })
+//#endregion
 
+//#region collaborator
 router.get("/addCollaborator", (req, res) => {
     let query = req.query;
     let inviteId = query.inviteId ?? query.inviteid ?? query.inviteID;
@@ -70,7 +73,9 @@ router.get("/deleteCollaborator", (req, res) => {
     let query = req.query;
     resolve(res, db.removeCollaborator(getPresentationId(query), getUsername(query)));
 }) 
+//#endregion
 
+//#region slide
 router.get("/addSlide", async (req, res) => {
     let query = req.query;
 
@@ -137,7 +142,9 @@ router.get("/deleteSlide", (req, res) => {
     let presentationId = getPresentationId(req.query);
     resolve(res, db.removeSlidesOf(presentationId));
 })
+//#endregion
 
+//#region option
 router.get("/addOption", async (req, res) => {
     let query = req.query;
 
@@ -162,9 +169,11 @@ router.get("/updateOption", (req, res) => {
 router.get("/deleteOption", (req, res) => {
     resolve(res, db.removeOptions(getOptionId(req.query) ?? query.id));
 })
+//#endregion
 
 export default router;
 
+//#region helpers
 function getPresentationName(query) {
     return query.presentationName ?? query.presentationname ?? query.name;
 }
@@ -185,10 +194,7 @@ function getOptionText(query) {
     return query.optionText ?? query.optiontext ?? query.option;
 }
 
-function getOptionId(query) {
-    return query.optionId ?? query.optionid ?? query.optionID;
-}
-
 function getCorrect(query) {
     return query.isCorrect ?? query.iscorrect ?? query.correct;
 }
+//#endregion
