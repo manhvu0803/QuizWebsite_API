@@ -4,6 +4,7 @@ import { SlideType } from "../define.mjs";
 import { resolve, run, getUsername, sendError } from "./routeUtils.mjs";
 import { sendCollabEmail } from "../mailer.js";
 import validateEmail from "../auth/mail.mjs";
+import { addCreatorData } from "../database/userDatabase.mjs";
 
 const router = express.Router();
 
@@ -27,10 +28,12 @@ router.get("/get", (req, res) => {
     });
 })
 
-router.get("/getByCreator", (req, res) => {
+router.get("/getByCreator", async (req, res) => {
     let query = req.query;
     let creator = getUsername(query) ?? query.creator ?? req.user.username;
-    resolve(res, db.getPresentationsOf(creator));
+    let data = await db.getPresentationsOf(creator);
+    await addCreatorData(data);
+    resolve(res, data);
 })
 
 router.get("/getByCollab", (req, res) => {
