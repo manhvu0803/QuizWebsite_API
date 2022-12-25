@@ -22,6 +22,7 @@ router.get("/edit", async (req, res) => {
         email: query.email,
         avatarUrl: getAvatarUrl(query),
         active: query.email == user.email,
+        password: query.password
     }
 
     resolve(res, db.updateUser(user.username, data));
