@@ -132,7 +132,7 @@ exports.sendCollabEmail = function ({toUser, inviter, presentname, inviteId}){
             html: `
                 <h3> Hello ${username}</h3>
                 <p> ${inviter} want you collab in presentation ${presentname} </p>
-                <p> To join, please follow this link: <a target="_" href="${process.env.host}/present/invite/${inviteId}">${presentname}</a> </p>
+                <p> To join, please follow this link: <a target="_" href="${process.env.host}/presentation/invite/${inviteId}">${presentname}</a> </p>
                 <p>Let's play</p>
             `
         }
