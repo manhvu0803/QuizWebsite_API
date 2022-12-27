@@ -16,12 +16,18 @@ router.get("/create", async (req, res) => {
     });
 })
 
-router.get("/get", (req, res) => {
+router.get("/get", async (req, res) => {
     let query = req.query;
     let id = getPresentationId(query) ?? query.id;
 
+    let presentation = await db.getPresentation(id);
+    
+    if (!presentation) {
+        sendError(res, "Presentation doesn't exist");
+        return;
+    }
+
     run(res, async () => {
-        let presentation = await db.getPresentation(id);
         presentation.slides = await db.getSlidesOf(id);
         presentation.creator = await getUser(presentation.creator);
         delete presentation.creator.password;

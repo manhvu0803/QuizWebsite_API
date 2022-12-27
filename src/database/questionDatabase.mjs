@@ -64,7 +64,7 @@ export function updatePresentation(id, data) {
 }
 
 export async function removePresentation(id) {
-	await removeSlidesOf(id);
+	await Promise.all([removeSlidesOf(id), removeCollaboratorsOf(id)]);
 	return db.deleteData("presentation", "id", id);
 }
 
@@ -90,6 +90,10 @@ export function getCollaborators(presentationId) {
 
 export function removeCollaborator(presentationId, username) {
 	return db.deleteData("collaborator", ["presentationId", "user"], [presentationId, username]);
+}
+
+export function removeCollaboratorsOf(presentationId) {
+	return db.deleteData("collaborator", "presentationId", presentationId);
 }
 
 /**
