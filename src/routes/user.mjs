@@ -2,6 +2,7 @@ import express from "express";
 import * as db from "../database/userDatabase.mjs";
 import "dotenv/config"
 import { sendData, sendError, resolve, getAvatarUrl, getDisplayName } from "./routeUtils.mjs"
+import { sendConfirmationEmail } from "../mailer.js";
 
 const router = express.Router();
 
@@ -16,13 +17,19 @@ router.get("/edit", async (req, res) => {
     let user = req.user;
     let query = req.query;
 
+    const active = query.email == user.email ? 1 : 0;
+
     let data = {
         displayName: getDisplayName(query),
         age: query.age,
         email: query.email,
         avatarUrl: getAvatarUrl(query),
-        active: query.email == user.email,
+        active: active,
         password: query.password
+    }
+
+    if (active !== 0) {
+        await sendConfirmationEmail({toUser: {email: query.email, username: user.username}, hash: null});
     }
 
     resolve(res, db.updateUser(user.username, data));
