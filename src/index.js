@@ -48,7 +48,7 @@ async function main() {
         console.log("Server is running on port " + PORT);
     })
 
-    const socket = new socketio.Server(server);
+    const socket = new socketio.Server(server, { cors: {}});
     app.use("/answer", passport.authenticate("jwt", {session: false}), getUserInfo.default, answerRoute.answerRoute(socket));
 }
 
