@@ -22,6 +22,10 @@ export function getGroupId(query) {
 	return query.groupId ?? query.groupID ?? query.groupid;
 }
 
+function getPresentationId(query) {
+    return query.presentationId ?? query.presentationid ?? query.presentationnID;
+}
+
 export function getOptionId(query) {
     return query.optionId ?? query.optionid ?? query.optionID;
 }

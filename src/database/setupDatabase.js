@@ -99,6 +99,19 @@ db.serialize(() => {
 		PRIMARY KEY (optionId, user)
 	)`, log);
 
+	db.run(`CREATE TABLE comment (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user TEXT,
+		presentationId INTEGER,
+		commentText TEXT,
+		answerText TEXT,
+		type INTGER,
+		time INTEGER,
+
+		FOREIGN KEY (user) REFERENCES user (username),
+		FOREIGN KEY (presentationId) REFERENCES presentation (id)
+	)`, (err) => log(err, "Created table comment"));
+
 	db.run(`CREATE TABLE collaborator (
 		user TEXT,
 		presentationId INTEGER,
