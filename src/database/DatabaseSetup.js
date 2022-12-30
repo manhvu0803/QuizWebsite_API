@@ -105,8 +105,9 @@ db.serialize(() => {
 		presentationId INTEGER,
 		commentText TEXT,
 		answerText TEXT,
-		type INTGER,
-		time INTEGER,
+		type INTEGER NOT NULL,
+		time INTEGER NOT NULL,
+		vote INTEGER DEFAULT 0 NOT NULL,
 
 		FOREIGN KEY (user) REFERENCES user (username),
 		FOREIGN KEY (presentationId) REFERENCES presentation (id)

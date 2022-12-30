@@ -22,7 +22,7 @@ export function getGroupId(query) {
 	return query.groupId ?? query.groupID ?? query.groupid;
 }
 
-function getPresentationId(query) {
+export function getPresentationId(query) {
     return query.presentationId ?? query.presentationid ?? query.presentationnID;
 }
 

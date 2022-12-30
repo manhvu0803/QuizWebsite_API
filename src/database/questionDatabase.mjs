@@ -1,4 +1,4 @@
-import { SlideType } from "../define.mjs";
+import { CommentType, SlideType } from "../define.mjs";
 import * as db from "./database.mjs"
 import { addCreatorData } from "./userDatabase.mjs";
 import { v4 as uuid } from "uuid";
@@ -188,4 +188,20 @@ export function addAnswer(username, optionId) {
 
 export function removeAnswer(username, optionId) {
 	return db.deleteData("answer", ["user", "optionId"], [username, optionId]);
+}
+
+export function addComment(presentationId, username, commentText, type = CommentType.Comment) {
+	return db.insertData("comment", ["presentationId", "username", "commentText", "type", "time"], [presentationId, username, commentText, type, Date.now()])
+}
+
+export function answerQuestion(commentId, answerText) {
+	return db.updateData("comment", "answerText", answerText, "id", commentId);
+}
+
+export function getComment(id) {
+	return db.getData("comment", "id", id);
+}
+
+export function getCommentsOf(presentationId) {
+	return db.getData("comment", "presentationId", presentationId);
 }

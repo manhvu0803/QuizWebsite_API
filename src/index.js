@@ -3,7 +3,6 @@ const express = require("express");
 const cors = require("cors");
 require("./auth/passport");
 const passport = require('passport');
-const { session } = require("passport");
 const socketio = require("socket.io");
 
 async function main() {
@@ -12,7 +11,8 @@ async function main() {
     const userRoute = await import("./routes/user.mjs");
     const authRoute = await import("./routes/auth.mjs");
     const presentationRoute = await import("./routes/presentation.mjs");
-    const answerRoute = await import("./routes/answer.mjs");
+    const sessionRoute = await import("./routes/presentationSession.mjs");
+    const socket = await import ("./socket.mjs");
 
     const app = express();
 
@@ -48,8 +48,9 @@ async function main() {
         console.log("Server is running on port " + PORT);
     })
 
-    const socket = new socketio.Server(server, { cors: {}});
-    app.use("/answer", passport.authenticate("jwt", {session: false}), getUserInfo.default, answerRoute.answerRoute(socket));
+    const io = new socketio.Server(server, { cors: {}});
+    socket.setupSocket(io);
+    app.use("/session", passport.authenticate("jwt", {session: false}), getUserInfo.default, sessionRoute.setup(io));
 }
 
 main();

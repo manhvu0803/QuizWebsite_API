@@ -1,10 +1,10 @@
 import express, { query } from "express";
 import * as db from "../database/questionDatabase.mjs";
 import { SlideType } from "../define.mjs";
-import { resolve, run, getUsername, sendError } from "./routeUtils.mjs";
+import { resolve, run, getUsername, getPresentationId, sendError } from "./routeUtils.mjs";
 import { sendCollabEmail } from "../mailer.js";
 import validateEmail from "../auth/mail.mjs";
-import { addCreatorData, getUser, getPresentationId } from "../database/userDatabase.mjs";
+import { addCreatorData, getUser } from "../database/userDatabase.mjs";
 
 const router = express.Router();
 

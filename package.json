@@ -6,8 +6,9 @@
   "scripts": {
     "start": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "createDb": "del database.db && node src/database/setupDatabase.js",
-    "testDb": "node src/database/testDatabase.mjs"
+    "createDb": "del database.db && node src/database/DatabaseSetup.js",
+    "createDbUnix": "rm database.db && node src/database/DatabaseSetup.js",
+    "testDb": "node src/database/DatabaseTest.mjs"
   },
   "author": "",
   "license": "ISC",
