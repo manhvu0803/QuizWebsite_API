@@ -8,7 +8,7 @@ export function setupSocket(socketIo) {
 function setupClient(socket) {
     socket.on("subscribe", async (username) => {
         let groups = await db.getGroupsUserIn(username);
-        for (let group in groups) {
+        for (let group of groups) {
             socket.join(`group_${group.id}`);
         }
         
