@@ -3,6 +3,7 @@ import * as db from "../database/questionDatabase.mjs";
 import * as userDb from "../database/userDatabase.mjs";
 import { getGroupId, getPresentationId, getOptionId, sendData, sendError, resolve } from "./routeUtils.mjs";
 import { v4 as uuid } from "uuid";
+import { Namespace } from "socket.io";
 
 var socketIo;
 
@@ -75,8 +76,11 @@ router.get("/presentation/move", (req, res) => {
 	session.currentSlideId = query.slideId;
 	session.currentSlideIndex = query.slideIndex ?? query.index;
 
-	socketIo.to(`group_${session.groupId}`)
-			.emit("moveToSlide", { currentSlideId: session.currentSlideId, currentSlideIndex: session.currentSlideIndex });
+	let namespace = (session.groupId)? socketIo.to(`group_${session.groupId}`) : socketIo;
+	namespace.emit("moveToSlide", { 
+		currentSlideId: session.currentSlideId, 
+		currentSlideIndex: session.currentSlideIndex 
+	});
 
 	sendData(res, { success: true });
 })
