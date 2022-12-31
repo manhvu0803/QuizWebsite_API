@@ -182,8 +182,8 @@ function newSession(presentationId, presenter, groupId) {
 		presentationId, 
 		presenter, 
 		groupId,
-		currentSlideId: 0,
-		currentSlideIndex: null
+		currentSlideId: null,
+		currentSlideIndex: 0
 	};
 	
 	sessionMap.set(sessionId, sessionData);
