@@ -198,18 +198,37 @@ export function answerQuestion(commentId, answerText) {
 	return db.updateData("comment", "answerText", answerText, "id", commentId);
 }
 
-export function getComment(id) {
-	return db.getData("comment", "id", id);
-}
-
-export async function getComments(ids) {
+export async function getComments(ids, type, username) {
 	let result = [];
 	for (let id of ids) {
-		let comment = await db.getData("comment", "id", id);
+		let comment = await getComment(id, type, username);
 		result.push(comment);
 	}
 
 	return comment;
+}
+
+export async function getComment(id, type, username) {
+	let query = `SELECT cmt.*, COUNT(upv.commentId) as voteAmount 
+	             FROM comment cmt LEFT JOIN upvote upv ON cmt.id = upv.commentId
+	             WHERE cmt.id = ? AND type = ?
+	             GROUP BY cmt.id`;
+
+	let [result, vote] = await Promise.all([
+		db.get(query, [id, type]), 
+		db.getData("upvote", ["id", "user"], [id, username])
+	]);
+	
+	result.voted = Boolean(vote);
+	return result;
+}
+
+export async function upvote(commentId, username) {
+	return db.insertData("upvote", ["commentId", "username", "time"], [commentId, username, Date.now()]);
+}
+
+export async function unvote(commentId, username) {
+	return db.deleteData("upvote", ["commentId", "username"], [commentId, username]);
 }
 
 export function getCommentsOf(presentationId) {

@@ -14,7 +14,7 @@ const groupMap = new Map();
 
 const presentationMap = new Map();
 
-router.get("/startPresentation/public", async (req, res) => {
+router.get("/presentation/start/public", async (req, res) => {
 	let presentationId = getPresentationId(req.query);
 
 	let presentation = await db.getPresentation(presentationId);
@@ -27,7 +27,7 @@ router.get("/startPresentation/public", async (req, res) => {
 	sendData(res, { sessionId: sessionId });
 })
 
-router.get("/startPresentation/group", async (req, res) => {
+router.get("/presentation/start/group", async (req, res) => {
 	let presentationId = getPresentationId(req.query);
 	let groupId = getGroupId(req.query);
 
@@ -59,7 +59,7 @@ router.get("/data", (req, res) => {
 		sendError(res, "Session doesn't exist");
 		return;
 	}
-	
+
 	if (userDb.getMember(req.user.username, session.groupId)) {
 		sendData(res, session);
 	}
@@ -68,23 +68,26 @@ router.get("/data", (req, res) => {
 	}
 })
 
-router.get("/moveToSlide", (req, res) => {
+router.get("/presentation/move", (req, res) => {
+	let query = req.query;
 	let session = sessionMap.get(req.query.sessionId);
-	session.slideId = req.query.slideId;
+
+	session.currentSlideId = query.slideId;
+	session.currentSlideIndex = query.slideIndex ?? query.index;
 
 	socketIo.to(`group_${session.groupId}`)
-	        .emit("moveToSlide", { currentSlideId: session.slideId });
+	        .emit("moveToSlide", { currentSlideId: session.currentSlideId, currentSlideIndex: session.currentSlideIndex });
 
 	sendData(res, { success: true });
 })
 
-router.get("/endPresentation", (req, res) => {
+router.get("/presentation/end", (req, res) => {
 	let query = req.query;
 	endSession(query.presentationId ?? query.sessionId);
 	sendData(res, { success: true });
 })
 
-router.get("/choseOption", async (req, res) => {
+router.get("/option/choose", async (req, res) => {
     let option = await db.getOption(getOptionId(req.query));
     if (!option) {
         sendError(res, "Option doesn't exists");
@@ -99,7 +102,7 @@ router.get("/choseOption", async (req, res) => {
     });
 })
 
-router.get("/removeChosen", async (req, res) => {
+router.get("/option/removeChosen", async (req, res) => {
     let option = db.getOption(req.query.optionId);
     if (!option) {
         sendError(res, "Option doesn't exists");
@@ -114,9 +117,9 @@ router.get("/removeChosen", async (req, res) => {
     });
 })
 
-router.get("/addComment", async (req, res) => {
+router.get("/comment/add", async (req, res) => {
 	let query = req.query;
-	let result = await db.addComment(query.presentationId, query.username, query.comment ?? query.commentText, query.type);
+	let result = await db.addComment(query.presentationId, req.user.username, query.comment ?? query.commentText, query.type);
 
 	socketIo.of(`/presentation/${query.presentationId}`)
 	        .emit("newComment", { commentId: result.lastID });
@@ -124,7 +127,7 @@ router.get("/addComment", async (req, res) => {
 	sendData(res, result);
 })
 
-router.get("/answerQuestion", async (req, res) => {
+router.get("/comment/answer", async (req, res) => {
 	let query = req.query;
 	let commentId = getCommentId(query);
 	let result = await db.answerQuestion(commentId, query.answerText ?? query.answer);
@@ -136,21 +139,29 @@ router.get("/answerQuestion", async (req, res) => {
 	sendData(res, result);
 })
 
-router.get("/getComment", (req, res) => {
+router.get("/comment/data", (req, res) => {
 	let query = req.query;
 	let commentId = getCommentId(query) ?? query.id;
 
 	if (Array.isArray(commentId)) {
-		resolve(res, db.getComments(commentId));
+		resolve(res, db.getComments(commentId, query.type, req.user.username));
 	}
 	else {
-		resolve(res, db.getComment(commentId));
+		resolve(res, db.getComment(commentId, query.type, req.user.username));
 	}
 });
 
-router.get("/getCommentsOf", (req, res) => {
+router.get("/comment/of", (req, res) => {
 	resolve(res, db.getCommentsOf(getPresentationId(req.query)));
 });
+
+router.get("/comment/upvote", (req, res) => {
+	resolve(res, db.upvote(req.query.commentId, req.user.username))
+})
+
+router.get("/comment/unvote", (req, res) => {
+	resolve(res, db.unvote(req.query.commentId, req.user.username))
+})
 
 export function setup(socketio) {
 	socketIo = socketio;
@@ -167,8 +178,14 @@ function getCommentId(query) {
 
 function newSession(presentationId, presenter, groupId) {
 	let sessionId = uuid();
-	let sessionData = { presentationId, presenter, groupId };
-	sessionData.currentSlideId = null;
+	let sessionData = { 
+		presentationId, 
+		presenter, 
+		groupId,
+		currentSlideId: 0,
+		currentSlideIndex: null
+	};
+	
 	sessionMap.set(sessionId, sessionData);
 	presentationMap.set(presentationId, sessionId);
 

@@ -107,11 +107,20 @@ db.serialize(() => {
 		answerText TEXT,
 		type INTEGER NOT NULL,
 		time INTEGER NOT NULL,
-		vote INTEGER DEFAULT 0 NOT NULL,
 
 		FOREIGN KEY (user) REFERENCES user (username),
 		FOREIGN KEY (presentationId) REFERENCES presentation (id)
 	)`, (err) => log(err, "Created table comment"));
+
+	db.run(`CREATE TABLE upvote (
+		commentId INTEGER,
+		user TEXT,
+		time INTEGER,
+
+		FOREIGN KEY (user) REFERENCES user (username),
+		FOREIGN KEY (commentId) REFERENCES comment (id),
+		PRIMARY KEY (commentId, user)
+	)`, (err) => log(err, "Created table upvote"));
 
 	db.run(`CREATE TABLE collaborator (
 		user TEXT,
