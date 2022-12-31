@@ -1,7 +1,7 @@
 import express, { query } from "express";
 import * as db from "../database/questionDatabase.mjs";
 import { SlideType } from "../define.mjs";
-import { resolve, run, getUsername, getPresentationId, sendError } from "./routeUtils.mjs";
+import { resolve, run, getUsername, getPresentationId, sendError, sendData } from "./routeUtils.mjs";
 import { sendCollabEmail } from "../mailer.js";
 import validateEmail from "../auth/mail.mjs";
 import { addCreatorData, getUser } from "../database/userDatabase.mjs";
@@ -124,6 +124,13 @@ async function getFullSlide(slideId) {
 
 	slide.options = await db.getOptionsOf(slide.id);
 
+	let promises = [];
+	for (let option of slide.options) {
+		promises.push(db.getAnswer(req.user.username, option.id).then((result) => option.userAnswer = result));
+	}
+
+	await Promise.all(promises);
+
 	return slide;
 }
 
@@ -159,6 +166,19 @@ router.get("/addOption", async (req, res) => {
 
 		return option;
 	});
+})
+
+router.get("getOption", async (req, res) => {
+	let option = await db.getOption(req.query.optionId);
+
+	if (!option) {
+		sendError("Option doesn't exist");
+		return;
+	}
+	
+	option.userAnswer = await db.getAnswer(req.user.username, option.id);
+
+	sendData(res, option);
 })
 
 router.get("/updateOption", (req, res) => {

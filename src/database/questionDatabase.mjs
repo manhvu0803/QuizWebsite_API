@@ -136,7 +136,11 @@ export async function removeSlidesOf(presentationId) {
 }
 
 export function getOption(id) {
-	return db.getData("option", "id", id);
+	let query = `SELECT option.*, COUNT(answer.optionId) as answerAmount 
+	             FROM option LEFT JOIN answer ON option.id = answer.optionId
+	             WHERE option.id = ?
+	             GROUP BY option.id`;
+	return db.get(query, [id]);
 }
 
 export function getOptionsOf(slideId) {

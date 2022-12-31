@@ -48,7 +48,7 @@ router.get("/presentation/start/group", async (req, res) => {
 
 	let sessionId = newSession(presentation.id, req.user.username, group.id);
 	socketIo.to(`group_${groupId}`)
-	        .emit("newSession", { sessionId: sessionId });
+			.emit("newSession", { sessionId: sessionId });
 	sendData(res, { sessionId: sessionId });
 })
 
@@ -76,7 +76,7 @@ router.get("/presentation/move", (req, res) => {
 	session.currentSlideIndex = query.slideIndex ?? query.index;
 
 	socketIo.to(`group_${session.groupId}`)
-	        .emit("moveToSlide", { currentSlideId: session.currentSlideId, currentSlideIndex: session.currentSlideIndex });
+			.emit("moveToSlide", { currentSlideId: session.currentSlideId, currentSlideIndex: session.currentSlideIndex });
 
 	sendData(res, { success: true });
 })
@@ -84,36 +84,45 @@ router.get("/presentation/move", (req, res) => {
 router.get("/presentation/end", (req, res) => {
 	let query = req.query;
 	endSession(query.presentationId ?? query.sessionId);
+	socketIo.of(`/presentation/${query.presentationId}`)
+			.emit("end");
 	sendData(res, { success: true });
 })
 
 router.get("/option/choose", async (req, res) => {
-    let option = await db.getOption(getOptionId(req.query));
-    if (!option) {
-        sendError(res, "Option doesn't exists");
-        return;
-    }
+	let option = await db.getOption(getOptionId(req.query));
+	if (!option) {
+		sendError(res, "Option doesn't exists");
+		return;
+	}
 
-    run(res, async () => {
-        let addPromise = db.addAnswer(req.user.username, option.id);
-        socketIo.of(`/presentation/${query.presentationId}`).emit(`newResult`, { slideId: option.slideId });
-        return addPromise;
-    });
+	run(res, async () => {
+		let result = await db.addAnswer(req.user.username, option.id);
+		socketIo.of(`/presentation/${query.presentationId}`)
+				.emit(`newResult`, { answerId: result.lastID });
+
+		return result;
+	});
 })
 
 router.get("/option/removeChosen", async (req, res) => {
-    let option = db.getOption(req.query.optionId);
-    if (!option) {
-        sendError(res, "Option doesn't exists");
-        return;
-    }
+	let option = db.getOption(req.query.optionId);
+	if (!option) {
+		sendError(res, "Option doesn't exists");
+		return;
+	}
 
-    run(res, async () => {
-        let addPromise = db.removeAnswer(req.user.username, option.id);
-        socketIo.of(`/presentation/${query.presentationId}`).emit(`newResult`, { slideId: option.slideId });
-        
-        return addPromise;
-    });
+	run(res, async () => {
+		let addPromise = db.removeAnswer(req.user.username, option.id);
+		socketIo.of(`/presentation/${query.presentationId}`)
+				.emit(`newResult`, { optionId: option.id });
+				
+		return addPromise;
+	});
+})
+
+router.get("/option/answer/data", (req, res) => {
+	resolve(res, db.getAnswer(req.user.username, req.query.optionId));
 })
 
 router.get("/comment/add", async (req, res) => {
@@ -121,7 +130,7 @@ router.get("/comment/add", async (req, res) => {
 	let result = await db.addComment(query.presentationId, req.user.username, query.comment ?? query.commentText, query.type);
 
 	socketIo.of(`/presentation/${query.presentationId}`)
-	        .emit("newComment", { commentId: result.lastID });
+			.emit("newComment", { commentId: result.lastID });
 
 	sendData(res, result);
 })
@@ -133,7 +142,7 @@ router.get("/comment/answer", async (req, res) => {
 	let comment = await db.getComment(commentId);
 
 	socketIo.of(`/presentation/${comment.presentationId}`)
-	        .emit("updateAnswer", { commentId: result.lastID });
+			.emit("updateAnswer", { commentId: result.lastID });
 
 	sendData(res, result);
 })
