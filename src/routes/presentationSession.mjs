@@ -12,6 +12,8 @@ const sessionMap = new Map();
 
 const groupMap = new Map();
 
+const presentationMap = new Map();
+
 router.get("/startPresentation/public", async (req, res) => {
 	let presentationId = getPresentationId(req.query);
 
@@ -51,15 +53,28 @@ router.get("/startPresentation/group", async (req, res) => {
 })
 
 router.get("/data", (req, res) => {
-	sendData(res, sessionMap.get(req.query.sessionId));
+	let session = sessionMap.get(req.query.sessionId);
+	if (userDb.getMember(req.user.username, session.groupId)) {
+		sendData(res, session);
+	}
+	else {
+		sendError(res, "User is not in the right group");
+	}
 })
 
 router.get("/moveToSlide", (req, res) => {
 	let session = sessionMap.get(req.query.sessionId);
 	session.slideId = req.query.slideId;
 
-	socketIo.to(`group_${session.groupId}`).emit("moveToSlide", { slideId: session.slideId });
+	socketIo.to(`group_${session.groupId}`)
+	        .emit("moveToSlide", { currentSlideId: session.slideId });
 
+	sendData(res, { success: true });
+})
+
+router.get("/endPresentation", (req, res) => {
+	let query = req.query;
+	endSession(query.presentationId ?? query.sessionId);
 	sendData(res, { success: true });
 })
 
@@ -117,7 +132,14 @@ router.get("/answerQuestion", async (req, res) => {
 
 router.get("/getComment", (req, res) => {
 	let query = req.query;
-	resolve(res, db.getComment(getCommentId(query)));
+	let commentId = getCommentId(query) ?? query.id;
+
+	if (Array.isArray(commentId)) {
+		resolve(res, db.getComments(commentId));
+	}
+	else {
+		resolve(res, db.getComment(commentId));
+	}
 });
 
 router.get("/getCommentsOf", (req, res) => {
@@ -139,11 +161,21 @@ function getCommentId(query) {
 
 function newSession(presentationId, presenter, groupId) {
 	let sessionId = uuid();
-	sessionMap.set(sessionId, { presentationId, presenter, groupId });
+	let sessionData = { presentationId, presenter, groupId };
+	sessionData.currentSlideId = null;
+	sessionMap.set(sessionId, sessionData);
+	presentationMap.set(presentationId, sessionId);
 
 	if (groupId) {
 		groupMap.set(groupId, sessionId);
 	}
 
 	return sessionId;
+}
+
+function endSession(presentationIdOrSessionId) {
+	let session = sessionMap.get(presentationIdOrSessionId) ?? presentationMap.get(presentationIdOrSessionId);
+	sessionMap.delete(session.id);
+	presentationMap.delete(session.presentationId);
+	groupMap.delete(session.groupId);
 }

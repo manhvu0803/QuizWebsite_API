@@ -74,10 +74,15 @@ export function getAllGroup(compareValue, column = "id") {
  */
 export function getGroupMembers(groupId) {
 	let query = `SELECT gm.timeJoined, gm.role, user.username, user.email, user.displayName 
-                    FROM groupMember gm INNER JOIN user ON gm.user = user.username
-					WHERE gm.groupId = '${groupId}'`;
+                 FROM groupMember gm INNER JOIN user ON gm.user = user.username
+				 WHERE gm.groupId = '${groupId}'`;
 
 	return db.all(query);
+}
+
+export async function getMember(username, groupId) {
+	let result = await db.all(query, [username, groupId]);
+	return db.getData("groupMember", ["user", "groupId"], [username, groupId])
 }
 
 export function getGroupsUserIn(username) {

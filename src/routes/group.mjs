@@ -36,6 +36,10 @@ router.get("/delete", (req, res) => {
 })
 //#endregion
 
+router.get("/getMember", (req, res) => {
+	resolve(res, db.getMember(req.user.username, getGroupId(req.query)));
+})
+
 //#region user
 router.get("/addUser", async (req, res) => {
 	let query = req.query;

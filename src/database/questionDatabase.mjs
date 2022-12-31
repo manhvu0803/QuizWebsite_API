@@ -202,6 +202,16 @@ export function getComment(id) {
 	return db.getData("comment", "id", id);
 }
 
+export async function getComments(ids) {
+	let result = [];
+	for (let id of ids) {
+		let comment = await db.getData("comment", "id", id);
+		result.push(comment);
+	}
+
+	return comment;
+}
+
 export function getCommentsOf(presentationId) {
 	return db.getData("comment", "presentationId", presentationId);
 }
