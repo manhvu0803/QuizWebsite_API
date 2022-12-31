@@ -88,7 +88,7 @@ router.get("/addSlide", async (req, res) => {
 
 	run(res, async () => {
 		let result = await addSlide(getPresentationId(query), getSlideType(query));
-		let slide = await getFullSlide(result.lastID);
+		let slide = await getFullSlide(result.lastID, req.user.username);
 
 		return slide;
 	})
@@ -108,14 +108,14 @@ async function addSlide(presentationId, type = SlideType.MultipleChoice) {
 router.get("/getSlide", async (req, res) => {
 	let slideId = getSlideId(req.query) ?? req.query.id;
 	if (slideId) {
-		resolve(res, getFullSlide(slideId));
+		resolve(res, getFullSlide(slideId, req.user.username));
 		return;
 	}
 
 	resolve(res, db.getSlidesOf(getPresentationId(req.query)));
 })
 
-async function getFullSlide(slideId) {
+async function getFullSlide(slideId, username) {
 	let slide = await db.getSlide(slideId);
 
 	if (!slide) {
@@ -126,7 +126,7 @@ async function getFullSlide(slideId) {
 
 	let promises = [];
 	for (let option of slide.options) {
-		promises.push(db.getAnswer(req.user.username, option.id).then((result) => option.userAnswer = result));
+		promises.push(db.getAnswer(username, option.id).then((result) => option.userAnswer = result));
 	}
 
 	await Promise.all(promises);
