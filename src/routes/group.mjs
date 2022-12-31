@@ -2,6 +2,7 @@ import express from "express";
 import * as db from "../database/userDatabase.mjs";
 import { getInviteId, getGroupId, getUsername, resolve, run, sendError } from "./routeUtils.mjs"
 import { sendInviteEmail } from "../mailer.js";
+import { getSessionByGroup } from "./presentationSession.mjs";
 
 const router = express.Router();
 
@@ -24,6 +25,7 @@ router.get("/get", async (req, res) => {
 		group.creator = await db.getUser(group.creator);
 		delete group.creator.password;
 		group.members = await db.getGroupMembers(group.id);
+		group.currentSession = getSessionByGroup(group.id);
 
 		return group;
 	});

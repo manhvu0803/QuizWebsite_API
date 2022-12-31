@@ -8,7 +8,9 @@ var socketIo;
 
 var router = Router();
 
-var sessionMap = new Map();
+const sessionMap = new Map();
+
+const groupMap = new Map();
 
 router.get("/startPresentation/public", async (req, res) => {
 	let presentationId = getPresentationId(req.query);
@@ -19,8 +21,7 @@ router.get("/startPresentation/public", async (req, res) => {
 		return;
 	}
 
-	let sessionId = uuid();
-	sessionMap.set(sessionId, presentation.id);
+	let sessionId = newSession(presentation.id, req.user.username, null);
 	sendData(res, { sessionId: sessionId });
 })
 
@@ -43,8 +44,7 @@ router.get("/startPresentation/group", async (req, res) => {
 		return;
 	}
 
-	let sessionId = uuid();
-	sessionMap.set(sessionId, { presentationId: presentation.id, groupId: group.id });
+	let sessionId = newSession(presentation.id, req.user.username, group.id);
 	socketIo.to(`group_${groupId}`)
 	        .emit("newSession", { sessionId: sessionId });
 	sendData(res, { sessionId: sessionId });
@@ -117,7 +117,7 @@ router.get("/answerQuestion", async (req, res) => {
 
 router.get("/getComment", (req, res) => {
 	let query = req.query;
-	resolve(res, db.getComment());
+	resolve(res, db.getComment(getCommentId(query)));
 });
 
 router.get("/getCommentsOf", (req, res) => {
@@ -129,6 +129,21 @@ export function setup(socketio) {
 	return router;
 }
 
+export function getSessionByGroup(groupId) {
+	return sessionMap.get(groupMap.get(groupId));
+}
+
 function getCommentId(query) {
 	return query.commentId ?? query.commentid ?? query.comment ?? query.id;
+}
+
+function newSession(presentationId, presenter, groupId) {
+	let sessionId = uuid();
+	sessionMap.set(sessionId, { presentationId, presenter, groupId });
+
+	if (groupId) {
+		groupMap.set(groupId, sessionId);
+	}
+
+	return sessionId;
 }

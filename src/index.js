@@ -4,6 +4,7 @@ const cors = require("cors");
 require("./auth/passport");
 const passport = require('passport');
 const socketio = require("socket.io");
+const morgan = require("morgan");
 
 async function main() {
     const getUserInfo = await import("./auth/user.mjs");
@@ -18,6 +19,8 @@ async function main() {
 
     const PORT = process.env.PORT || 5000;
 
+    app.use(morgan("dev"));
+    
     app.use(cookieSession(
         {
             name: "session",
