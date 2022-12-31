@@ -54,6 +54,12 @@ router.get("/startPresentation/group", async (req, res) => {
 
 router.get("/data", (req, res) => {
 	let session = sessionMap.get(req.query.sessionId);
+
+	if (!session) {
+		sendError(res, "Session doesn't exist");
+		return;
+	}
+	
 	if (userDb.getMember(req.user.username, session.groupId)) {
 		sendData(res, session);
 	}

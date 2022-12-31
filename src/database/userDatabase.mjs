@@ -81,7 +81,6 @@ export function getGroupMembers(groupId) {
 }
 
 export async function getMember(username, groupId) {
-	let result = await db.all(query, [username, groupId]);
 	return db.getData("groupMember", ["user", "groupId"], [username, groupId])
 }
 
