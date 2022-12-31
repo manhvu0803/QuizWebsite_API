@@ -78,7 +78,7 @@ router.get("/endPresentation", (req, res) => {
 	sendData(res, { success: true });
 })
 
-router.get("/answer", async (req, res) => {
+router.get("/choseOption", async (req, res) => {
     let option = await db.getOption(getOptionId(req.query));
     if (!option) {
         sendError(res, "Option doesn't exists");
@@ -93,7 +93,7 @@ router.get("/answer", async (req, res) => {
     });
 })
 
-router.get("/removeAnswer", async (req, res) => {
+router.get("/removeChosen", async (req, res) => {
     let option = db.getOption(req.query.optionId);
     if (!option) {
         sendError(res, "Option doesn't exists");
