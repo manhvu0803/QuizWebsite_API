@@ -23,7 +23,7 @@ router.get("/presentation/start/public", async (req, res) => {
 		return;
 	}
 
-	let sessionId = newSession(presentation.id, "req.user.username", null);
+	let sessionId = newSession(presentation.id, req.user.username, null);
 	sendData(res, { sessionId: sessionId });
 })
 
