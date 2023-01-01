@@ -12,6 +12,8 @@ function setupClient(socket) {
             socket.join(`group_${group.id}`);
         }
         
-        console.log(`User ${username} subscribed`);
+        console.log(`User ${username} subscribed with ID ${socket.id}`);
     });
+
+    socket.on("disconnect", (reason) => console.log(`${socket.id} disconnected because ${reason}`));
 }

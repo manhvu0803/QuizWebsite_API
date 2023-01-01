@@ -3,7 +3,6 @@ import * as db from "../database/questionDatabase.mjs";
 import * as userDb from "../database/userDatabase.mjs";
 import { getGroupId, getPresentationId, getOptionId, sendData, sendError, resolve } from "./routeUtils.mjs";
 import { v4 as uuid } from "uuid";
-import { Namespace } from "socket.io";
 
 var socketIo;
 
@@ -24,7 +23,7 @@ router.get("/presentation/start/public", async (req, res) => {
 		return;
 	}
 
-	let sessionId = newSession(presentation.id, req.user.username, null);
+	let sessionId = newSession(presentation.id, "req.user.username", null);
 	sendData(res, { sessionId: sessionId });
 })
 
@@ -76,10 +75,9 @@ router.get("/presentation/move", (req, res) => {
 	session.currentSlideId = query.slideId;
 	session.currentSlideIndex = query.slideIndex ?? query.index;
 
-	let namespace = (session.groupId)? socketIo.to(`group_${session.groupId}`) : socketIo;
-	namespace.emit("moveToSlide", { 
+	socketIo.emit(`/presentation/${session.presentationId}/moveToSlide`, { 
 		currentSlideId: session.currentSlideId, 
-		currentSlideIndex: session.currentSlideIndex 
+		currentSlideIndex: session.currentSlideIndex
 	});
 
 	sendData(res, { success: true });
@@ -88,8 +86,7 @@ router.get("/presentation/move", (req, res) => {
 router.get("/presentation/end", (req, res) => {
 	let query = req.query;
 	endSession(query.presentationId ?? query.sessionId);
-	socketIo.of(`/presentation/${query.presentationId}`)
-			.emit("end");
+	socketIo.emit(`/presentation/${query.presentationId}/end`);
 	sendData(res, { success: true });
 })
 
@@ -102,8 +99,7 @@ router.get("/option/choose", async (req, res) => {
 
 	run(res, async () => {
 		let result = await db.addAnswer(req.user.username, option.id);
-		socketIo.of(`/presentation/${query.presentationId}`)
-				.emit(`newResult`, { answerId: result.lastID });
+		socketIo.emit(`/presentation/${query.presentationId}/newResult`, { answerId: result.lastID });
 
 		return result;
 	});
@@ -118,8 +114,7 @@ router.get("/option/removeChosen", async (req, res) => {
 
 	run(res, async () => {
 		let addPromise = db.removeAnswer(req.user.username, option.id);
-		socketIo.of(`/presentation/${query.presentationId}`)
-				.emit(`newResult`, { optionId: option.id });
+		socketIo.emit(`/presentation/${query.presentationId}/newResult`, { optionId: option.id });
 				
 		return addPromise;
 	});
@@ -133,8 +128,7 @@ router.get("/comment/add", async (req, res) => {
 	let query = req.query;
 	let result = await db.addComment(query.presentationId, req.user.username, query.comment ?? query.commentText, query.type);
 
-	socketIo.of(`/presentation/${query.presentationId}`)
-			.emit("newComment", { commentId: result.lastID });
+	socketIo.emit(`/presentation/${query.presentationId}/newComment`, { commentId: result.lastID });
 
 	sendData(res, result);
 })
@@ -145,8 +139,7 @@ router.get("/comment/answer", async (req, res) => {
 	let result = await db.answerQuestion(commentId, query.answerText ?? query.answer);
 	let comment = await db.getComment(commentId);
 
-	socketIo.of(`/presentation/${comment.presentationId}`)
-			.emit("updateAnswer", { commentId: result.lastID });
+	socketIo.emit(`/presentation/${query.presentationId}/updateAnswer`, { commentId: result.lastID });
 
 	sendData(res, result);
 })
