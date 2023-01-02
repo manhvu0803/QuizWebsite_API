@@ -23,8 +23,7 @@ router.get("/presentation/start/public", async (req, res) => {
 		return;
 	}
 
-	let sessionId = newSession(presentation.id, req.user.username, null);
-	sendData(res, sessionMap.get(sessionId));
+	sendData(res, newSession(presentation.id, req.user.username, null));
 })
 
 router.get("/presentation/start/group", async (req, res) => {
