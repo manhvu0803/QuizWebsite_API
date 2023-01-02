@@ -154,7 +154,7 @@ router.get("/comment/answer", async (req, res) => {
 	let result = await db.answerQuestion(commentId, query.answerText ?? query.answer);
 	let comment = await db.getComment(commentId, req.user.username);
 
-	socketIo.emit(`/presentation/${query.presentationId}/updateAnswer`, comment);
+	socketIo.emit(`/presentation/${comment.presentationId}/updateAnswer`, comment);
 
 	sendData(res, result);
 })

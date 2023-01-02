@@ -226,7 +226,7 @@ export async function getComments(ids, username) {
 		result.push(comment);
 	}
 
-	return comment;
+	return result;
 }
 
 export async function getComment(id, username) {
