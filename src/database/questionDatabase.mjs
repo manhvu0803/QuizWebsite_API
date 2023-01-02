@@ -219,24 +219,24 @@ export function answerQuestion(commentId, answerText) {
 	return db.updateData("comment", "answerText", answerText, "id", commentId);
 }
 
-export async function getComments(ids, type, username) {
+export async function getComments(ids, username) {
 	let result = [];
 	for (let id of ids) {
-		let comment = await getComment(id, type, username);
+		let comment = await getComment(id, username);
 		result.push(comment);
 	}
 
 	return comment;
 }
 
-export async function getComment(id, type, username) {
+export async function getComment(id, username) {
 	let query = `SELECT cmt.*, COUNT(upv.commentId) as voteAmount 
 	             FROM comment cmt LEFT JOIN upvote upv ON cmt.id = upv.commentId
-	             WHERE cmt.id = ? AND type = ?
+	             WHERE cmt.id = ?
 	             GROUP BY cmt.id`;
 
 	let [result, vote] = await Promise.all([
-		db.get(query, [id, type]), 
+		db.get(query, [id]), 
 		db.getData("upvote", ["id", "user"], [id, username])
 	]);
 	

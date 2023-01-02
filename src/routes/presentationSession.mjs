@@ -141,7 +141,7 @@ router.get("/option/answer/data", (req, res) => {
 router.get("/comment/add", async (req, res) => {
 	let query = req.query;
 	let result = await db.addComment(query.presentationId, req.user.username, query.comment ?? query.commentText, query.type);
-	let comment = await db.getComment(res.lastID);
+	let comment = await db.getComment(result.lastID, req.user.username);
 
 	socketIo.emit(`/presentation/${query.presentationId}/newComment`, comment);
 
@@ -152,7 +152,7 @@ router.get("/comment/answer", async (req, res) => {
 	let query = req.query;
 	let commentId = getCommentId(query);
 	let result = await db.answerQuestion(commentId, query.answerText ?? query.answer);
-	let comment = await db.getComment(commentId);
+	let comment = await db.getComment(commentId, req.user.username);
 
 	socketIo.emit(`/presentation/${query.presentationId}/updateAnswer`, comment);
 
@@ -164,10 +164,10 @@ router.get("/comment/data", (req, res) => {
 	let commentId = getCommentId(query) ?? query.id;
 
 	if (Array.isArray(commentId)) {
-		resolve(res, db.getComments(commentId, query.type, req.user.username));
+		resolve(res, db.getComments(commentId, req.user.username));
 	}
 	else {
-		resolve(res, db.getComment(commentId, query.type, req.user.username));
+		resolve(res, db.getComment(commentId, req.user.username));
 	}
 });
 
@@ -176,7 +176,7 @@ router.get("/comment/of", (req, res) => {
 });
 
 router.get("/comment/upvote", async (req, res) => {
-	let comment = await db.getComment(req.query.commentId);
+	let comment = await db.getComment(req.query.commentId, req.user.username);
 	
 	if (!comment) {
 		sendError(res, "Comment doesn't exist");
@@ -192,7 +192,7 @@ router.get("/comment/upvote", async (req, res) => {
 })
 
 router.get("/comment/unvote", async (req, res) => {
-	let comment = await db.getComment(req.query.commentId);
+	let comment = await db.getComment(req.query.commentId, req.user.username);
 	
 	if (!comment) {
 		sendError(res, "Comment doesn't exist");
