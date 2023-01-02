@@ -24,7 +24,7 @@ router.get("/presentation/start/public", async (req, res) => {
 	}
 
 	let sessionId = newSession(presentation.id, req.user.username, null);
-	sendData(res, { sessionId: sessionId });
+	sendData(res, sessionMap.get(sessionId));
 })
 
 router.get("/presentation/start/group", async (req, res) => {
@@ -49,7 +49,7 @@ router.get("/presentation/start/group", async (req, res) => {
 	let sessionId = newSession(presentation.id, req.user.username, group.id);
 	socketIo.to(`group_${groupId}`)
 			.emit("newSession", { sessionId: sessionId });
-	sendData(res, { sessionId: sessionId });
+	sendData(res, sessionMap.get(sessionId));
 })
 
 router.get("/data", (req, res) => {
