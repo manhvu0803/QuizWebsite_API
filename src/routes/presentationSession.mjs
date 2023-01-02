@@ -141,8 +141,9 @@ router.get("/option/answer/data", (req, res) => {
 router.get("/comment/add", async (req, res) => {
 	let query = req.query;
 	let result = await db.addComment(query.presentationId, req.user.username, query.comment ?? query.commentText, query.type);
+	let comment = await db.getComment(res.lastID);
 
-	socketIo.emit(`/presentation/${query.presentationId}/newComment`, { commentId: result.lastID });
+	socketIo.emit(`/presentation/${query.presentationId}/newComment`, comment);
 
 	sendData(res, result);
 })
@@ -153,7 +154,7 @@ router.get("/comment/answer", async (req, res) => {
 	let result = await db.answerQuestion(commentId, query.answerText ?? query.answer);
 	let comment = await db.getComment(commentId);
 
-	socketIo.emit(`/presentation/${query.presentationId}/updateAnswer`, { commentId: result.lastID });
+	socketIo.emit(`/presentation/${query.presentationId}/updateAnswer`, comment);
 
 	sendData(res, result);
 })
