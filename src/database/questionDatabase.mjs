@@ -179,11 +179,19 @@ export function getAnswer(username, optionId) {
 	return db.getData("answer", ["user", "optionId"], [username, optionId]);
 }
 
-export function getAnswersOf(username, slideId) {
+export function getAnswersOfUser(username, slideId) {
 	let query = `SELECT answer.*
 				 FROM answer INNER JOIN option ON answer.optionId = option.id
 				 WHERE option.slideId = ${slideId} AND answer.user = ${username}`;
-	return db.all(slideId);
+	return db.all(query);
+}
+
+export function getAnswersOfSlide(slideId) {
+	let query = `SELECT answer.*
+				 FROM answer INNER JOIN option ON answer.optionId = option.id
+				 WHERE option.slideId = ${slideId}
+				 ORDER BY answer.timeAnswered ASC`;
+	return db.all(query);
 }
 
 export function addAnswer(username, optionId) {

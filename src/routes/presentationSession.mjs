@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as db from "../database/questionDatabase.mjs";
 import * as userDb from "../database/userDatabase.mjs";
-import { getGroupId, getPresentationId, getOptionId, sendData, sendError, resolve } from "./routeUtils.mjs";
+import { getGroupId, getPresentationId, getOptionId, sendData, sendError, resolve, run } from "./routeUtils.mjs";
 import { v4 as uuid } from "uuid";
 
 var socketIo;
@@ -92,14 +92,17 @@ router.get("/presentation/end", (req, res) => {
 
 router.get("/option/choose", async (req, res) => {
 	let option = await db.getOption(getOptionId(req.query));
+
 	if (!option) {
 		sendError(res, "Option doesn't exists");
 		return;
 	}
 
+	let slide = await db.getSlide(option.slideId);
+
 	run(res, async () => {
 		let result = await db.addAnswer(req.user.username, option.id);
-		socketIo.emit(`/presentation/${query.presentationId}/newResult`, { answerId: result.lastID });
+		socketIo.emit(`/presentation/${slide.presentationId}/newResult`, { answerId: result.lastID });
 
 		return result;
 	});

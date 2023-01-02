@@ -129,6 +129,8 @@ async function getFullSlide(slideId, username) {
 		promises.push(db.getAnswer(username, option.id).then((result) => option.userAnswer = result));
 	}
 
+	promises.push(db.getAnswersOfSlide(slide.id).then((result) => slide.answers = result));
+
 	await Promise.all(promises);
 
 	return slide;
