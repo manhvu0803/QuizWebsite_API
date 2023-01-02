@@ -253,7 +253,7 @@ export async function unvote(commentId, username) {
 }
 
 export async function isCommentUpvoted(commentId, username) {
-	return Boolean(db.getData("upvote", ["commentId", "user"], [commentId, username]));
+	return Boolean(await db.getData("upvote", ["commentId", "user"], [commentId, username]));
 }
 
 export async function getCommentsOf(presentationId, username) {
