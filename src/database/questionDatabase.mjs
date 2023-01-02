@@ -237,7 +237,7 @@ export async function getComment(id, username) {
 
 	let [result, vote] = await Promise.all([
 		db.get(query, [id]), 
-		db.getData("upvote", ["id", "user"], [id, username])
+		db.getData("upvote", ["commentId", "user"], [id, username])
 	]);
 	
 	result.isUpvoted = Boolean(vote);
@@ -256,6 +256,19 @@ export async function isCommentUpvoted(commentId, username) {
 	return Boolean(db.getData("upvote", ["commentId", "user"], [commentId, username]));
 }
 
-export function getCommentsOf(presentationId) {
-	return db.getAllData("comment", "presentationId", presentationId);
+export async function getCommentsOf(presentationId, username) {
+	let query = `SELECT cmt.*, COUNT(upv.commentId) as voteAmount 
+				 FROM comment cmt LEFT JOIN upvote upv ON cmt.id = upv.commentId
+				 WHERE cmt.presentationId = ?
+				 GROUP BY cmt.id`;
+	let comments = await db.all(query, [presentationId]);
+
+	let promises = [];
+	for (let comment of comments) {
+		promises.push(isCommentUpvoted(comment.id, username).then((result) => comment.isUpvoted = result));
+	}
+
+	await Promise.all(promises);
+
+	return comments;
 }

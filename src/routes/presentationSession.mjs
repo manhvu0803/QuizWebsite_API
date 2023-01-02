@@ -172,7 +172,7 @@ router.get("/comment/data", (req, res) => {
 });
 
 router.get("/comment/of", (req, res) => {
-	resolve(res, db.getCommentsOf(getPresentationId(req.query)));
+	resolve(res, db.getCommentsOf(getPresentationId(req.query), req.user.username));
 });
 
 router.get("/comment/upvote", async (req, res) => {
