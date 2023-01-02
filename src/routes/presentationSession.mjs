@@ -123,7 +123,7 @@ router.get("/option/removeChosen", async (req, res) => {
 		let result = await db.removeAnswer(req.user.username, option.id);
 		let slide = await db.getSlide(option.slideId);
 
-		socketIo.emit(`/presentation/${query.presentationId}/newResult`, { 
+		socketIo.emit(`/presentation/${query.presentationId}/removeAnswer`, { 
 			user: req.user.username,
 			optionId: option.id,
 			optionText: option.optionText,
@@ -174,12 +174,36 @@ router.get("/comment/of", (req, res) => {
 	resolve(res, db.getCommentsOf(getPresentationId(req.query)));
 });
 
-router.get("/comment/upvote", (req, res) => {
-	resolve(res, db.upvote(req.query.commentId, req.user.username))
+router.get("/comment/upvote", async (req, res) => {
+	let comment = await db.getComment(req.query.commentId);
+	
+	if (!comment) {
+		sendError(res, "Comment doesn't exist");
+		return;
+	}
+	
+	socketIo.emit(`/presentation/${comment.presentationId}/upvote`, {
+		commentId: comment.id,
+		user: req.user.username
+	});
+
+	resolve(res, db.upvote(req.query.commentId, req.user.username));
 })
 
-router.get("/comment/unvote", (req, res) => {
-	resolve(res, db.unvote(req.query.commentId, req.user.username))
+router.get("/comment/unvote", async (req, res) => {
+	let comment = await db.getComment(req.query.commentId);
+	
+	if (!comment) {
+		sendError(res, "Comment doesn't exist");
+		return;
+	}
+	
+	socketIo.emit(`/presentation/${comment.presentationId}/unvote`, {
+		commentId: comment.id,
+		user: req.user.username
+	});
+
+	resolve(res, db.unvote(req.query.commentId, req.user.username));
 })
 
 export function setup(socketio) {

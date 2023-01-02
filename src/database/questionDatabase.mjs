@@ -240,7 +240,7 @@ export async function getComment(id, type, username) {
 		db.getData("upvote", ["id", "user"], [id, username])
 	]);
 	
-	result.voted = Boolean(vote);
+	result.isUpvoted = Boolean(vote);
 	return result;
 }
 
@@ -252,6 +252,10 @@ export async function unvote(commentId, username) {
 	return db.deleteData("upvote", ["commentId", "username"], [commentId, username]);
 }
 
+export async function isCommentUpvoted(commentId, username) {
+	return Boolean(db.getData("upvote", ["commentId", "username"], [commentId, username]));
+}
+
 export function getCommentsOf(presentationId) {
-	return db.getData("comment", "presentationId", presentationId);
+	return db.getAllData("comment", "presentationId", presentationId);
 }
