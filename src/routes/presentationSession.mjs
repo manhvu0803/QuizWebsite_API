@@ -89,8 +89,8 @@ router.get("/presentation/move", (req, res) => {
 
 router.get("/presentation/end", (req, res) => {
 	let query = req.query;
-	endSession(query.presentationId ?? query.sessionId);
-	socketIo.emit(`/presentation/${query.presentationId}/endSession`);
+	let session = endSession(query.presentationId ?? query.sessionId);
+	socketIo.emit(`/presentation/${session.presentationId}/endSession`);
 	sendData(res, { success: true });
 })
 
@@ -249,4 +249,5 @@ function endSession(presentationIdOrSessionId) {
 	sessionMap.delete(session.id);
 	presentationMap.delete(session.presentationId);
 	groupMap.delete(session.groupId);
+	return session;
 }
