@@ -46,10 +46,15 @@ router.get("/presentation/start/group", async (req, res) => {
 		return;
 	}
 
-	let sessionId = newSession(presentation.id, req.user.username, group.id);
+	if (getSessionByGroup(group.id)) {
+		sendError(res, "Group is having a session");
+		return;
+	}
+
+	let session = newSession(presentation.id, req.user.username, group.id);
 	socketIo.to(`group_${groupId}`)
-			.emit("newSession", { sessionId: sessionId });
-	sendData(res, sessionMap.get(sessionId));
+			.emit("newSession", session);
+	sendData(res, { sessionId: session.id });
 })
 
 router.get("/data", (req, res) => {
@@ -86,7 +91,7 @@ router.get("/presentation/move", (req, res) => {
 router.get("/presentation/end", (req, res) => {
 	let query = req.query;
 	endSession(query.presentationId ?? query.sessionId);
-	socketIo.emit(`/presentation/${query.presentationId}/end`);
+	socketIo.emit(`/presentation/${query.presentationId}/endSession`);
 	sendData(res, { success: true });
 })
 
@@ -104,7 +109,6 @@ router.get("/option/choose", async (req, res) => {
 		let result = await db.addAnswer(req.user.username, option.id);
 		let answer = await db.getAnswer(req.user.username, option.id);
 		answer.optionText = option.optionText;
-		let slide = await db.getSlide(option.slideId);
 		answer.question = slide.question;
 		socketIo.emit(`/presentation/${slide.presentationId}/newResult`, answer);
 
@@ -222,7 +226,8 @@ function getCommentId(query) {
 
 function newSession(presentationId, presenter, groupId) {
 	let sessionId = uuid();
-	let sessionData = { 
+	let sessionData = {
+		id: sessionId,
 		presentationId, 
 		presenter, 
 		groupId,
@@ -237,7 +242,7 @@ function newSession(presentationId, presenter, groupId) {
 		groupMap.set(groupId, sessionId);
 	}
 
-	return sessionId;
+	return sessionData;
 }
 
 function endSession(presentationIdOrSessionId) {
