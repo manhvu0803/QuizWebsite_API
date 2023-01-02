@@ -129,8 +129,6 @@ async function getFullSlide(slideId, username) {
 		promises.push(db.getAnswer(username, option.id).then((result) => option.userAnswer = result));
 	}
 
-	promises.push(db.getAnswersOfSlide(slide.id).then((result) => slide.answers = result));
-
 	await Promise.all(promises);
 
 	return slide;
@@ -195,6 +193,14 @@ router.get("/updateOption", (req, res) => {
 
 router.get("/deleteOption", (req, res) => {
 	resolve(res, db.removeOptions(getOptionId(req.query) ?? query.id));
+})
+
+router.get("/answerBySlide", (req, res) => {
+	resolve(res, db.getAnswersOfSlide(getSlideId(req.query)));
+})
+
+router.get("/answerByPresentaion", (req, res) => {
+	resolve(res, db.getAnswersOfPresentation(getPresentationId(req.query)));
 })
 
 router.get("/invite", validateEmail, async (req, res) => {

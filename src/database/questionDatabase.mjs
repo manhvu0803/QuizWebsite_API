@@ -194,6 +194,15 @@ export function getAnswersOfSlide(slideId) {
 	return db.all(query);
 }
 
+
+export function getAnswersOfPresentation(presentationId) {
+	let query = `SELECT answer.*, option.optionText, slide.question
+				 FROM answer INNER JOIN option ON answer.optionId = option.id INNER JOIN slide ON option.slideId = slide.id
+				 WHERE slide.presentationId = ${presentationId}
+				 ORDER BY answer.timeAnswered ASC`;
+	return db.all(query);
+}
+
 export function addAnswer(username, optionId) {
 	return db.upsertData("answer", ["user", "optionId", "timeAnswered"], [username, optionId, Date.now()], ["user", "optionId"], [username, optionId]);
 }
