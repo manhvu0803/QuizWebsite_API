@@ -103,6 +103,7 @@ router.get("/option/choose", async (req, res) => {
 	run(res, async () => {
 		let result = await db.addAnswer(req.user.username, option.id);
 		let answer = await db.getAnswer(req.user.username, option.id);
+		answer.option = option;
 		socketIo.emit(`/presentation/${slide.presentationId}/newResult`, answer);
 
 		return result;
@@ -120,7 +121,8 @@ router.get("/option/removeChosen", async (req, res) => {
 		let addPromise = db.removeAnswer(req.user.username, option.id);
 		socketIo.emit(`/presentation/${query.presentationId}/newResult`, { 
 			user: req.user.username,
-			optionId: option.id
+			optionId: option.id,
+			option: option
 		});
 				
 		return addPromise;
