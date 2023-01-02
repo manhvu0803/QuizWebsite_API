@@ -212,7 +212,7 @@ export function removeAnswer(username, optionId) {
 }
 
 export function addComment(presentationId, username, commentText, type = CommentType.Comment) {
-	return db.insertData("comment", ["presentationId", "username", "commentText", "type", "time"], [presentationId, username, commentText, type, Date.now()])
+	return db.insertData("comment", ["presentationId", "user", "commentText", "type", "time"], [presentationId, username, commentText, type, Date.now()])
 }
 
 export function answerQuestion(commentId, answerText) {
@@ -245,15 +245,15 @@ export async function getComment(id, type, username) {
 }
 
 export async function upvote(commentId, username) {
-	return db.insertData("upvote", ["commentId", "username", "time"], [commentId, username, Date.now()]);
+	return db.insertData("upvote", ["commentId", "user", "time"], [commentId, username, Date.now()]);
 }
 
 export async function unvote(commentId, username) {
-	return db.deleteData("upvote", ["commentId", "username"], [commentId, username]);
+	return db.deleteData("upvote", ["commentId", "user"], [commentId, username]);
 }
 
 export async function isCommentUpvoted(commentId, username) {
-	return Boolean(db.getData("upvote", ["commentId", "username"], [commentId, username]));
+	return Boolean(db.getData("upvote", ["commentId", "user"], [commentId, username]));
 }
 
 export function getCommentsOf(presentationId) {
