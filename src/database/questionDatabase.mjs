@@ -64,7 +64,7 @@ export function updatePresentation(id, data) {
 }
 
 export async function removePresentation(id) {
-	await Promise.all([removeSlidesOf(id), removeCollaboratorsOf(id)]);
+	await Promise.all([removeSlidesOf(id), removeCollaboratorsOf(id), removeCommentsIn(id)]);
 	return db.deleteData("presentation", "id", id);
 }
 
@@ -194,7 +194,6 @@ export function getAnswersOfSlide(slideId) {
 	return db.all(query);
 }
 
-
 export function getAnswersOfPresentation(presentationId) {
 	let query = `SELECT answer.*, option.optionText, slide.question
 				 FROM answer INNER JOIN option ON answer.optionId = option.id INNER JOIN slide ON option.slideId = slide.id
@@ -271,4 +270,30 @@ export async function getCommentsOf(presentationId, username) {
 	await Promise.all(promises);
 
 	return comments;
+}
+
+export async function deleteComment(id) {
+	await db.deleteData("upvote", "commentId", id);
+	return db.deleteData("comment", "id", id)
+}
+
+export async function removeCommentsIn(presentationId) {
+	return deleteComments("presentationId", presentationId);
+}
+
+export async function removeCommentsOf(username) {
+	return deleteComments("user", username);
+}
+
+async function removeComments(compareColumn, compareValue) {
+	let comments = await db.getAllData("comment", compareColumn, compareValue);
+
+	let promises = [];
+	for (let comment of comments) {
+		promises.push(deleteComment(comment.id));
+	}
+
+	await Promise.all(promises);
+
+	return db.deleteData("comment", compareColumn, compareValue);
 }
