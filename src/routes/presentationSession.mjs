@@ -145,6 +145,7 @@ router.get("/comment/add", async (req, res) => {
 	let query = req.query;
 	let result = await db.addComment(query.presentationId, req.user.username, query.comment ?? query.commentText, query.type);
 	let comment = await db.getComment(result.lastID, req.user.username);
+	delete comment.isUpvoted;
 
 	socketIo.emit(`/presentation/${query.presentationId}/newComment`, comment);
 
@@ -156,6 +157,7 @@ router.get("/comment/answer", async (req, res) => {
 	let commentId = getCommentId(query);
 	let result = await db.answerQuestion(commentId, query.answerText ?? query.answer);
 	let comment = await db.getComment(commentId, req.user.username);
+	delete comment.isUpvoted;
 
 	socketIo.emit(`/presentation/${comment.presentationId}/updateAnswer`, comment);
 
