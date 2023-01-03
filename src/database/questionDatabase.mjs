@@ -272,17 +272,17 @@ export async function getCommentsOf(presentationId, username) {
 	return comments;
 }
 
-export async function deleteComment(id) {
+export async function removeComment(id) {
 	await db.deleteData("upvote", "commentId", id);
 	return db.deleteData("comment", "id", id)
 }
 
 export async function removeCommentsIn(presentationId) {
-	return deleteComments("presentationId", presentationId);
+	return removeComments("presentationId", presentationId);
 }
 
 export async function removeCommentsOf(username) {
-	return deleteComments("user", username);
+	return removeComments("user", username);
 }
 
 async function removeComments(compareColumn, compareValue) {
@@ -290,7 +290,7 @@ async function removeComments(compareColumn, compareValue) {
 
 	let promises = [];
 	for (let comment of comments) {
-		promises.push(deleteComment(comment.id));
+		promises.push(removeComment(comment.id));
 	}
 
 	await Promise.all(promises);
