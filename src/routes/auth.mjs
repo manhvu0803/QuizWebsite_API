@@ -26,42 +26,6 @@ async function verifyGoogleToken(token) {
     }
 }
 
-// router.post("/signup/google", async (req, res) => {
-//     try {
-//         // console.log({ verified: verifyGoogleToken(req.body.credential) });
-//         if (req.body.credential) {
-//             const verificationResponse = await verifyGoogleToken(req.body.credential);
-
-//             if (verificationResponse.error) {
-//             return res.status(400).json({
-//                 message: verificationResponse.error,
-//             });
-//         }
-
-//         const profile = verificationResponse?.payload;
-
-//         DB.push(profile);
-
-//         res.status(201).json({
-//             message: "Signup was successful",
-//             user: {
-//             firstName: profile?.given_name,
-//             lastName: profile?.family_name,
-//             picture: profile?.picture,
-//             email: profile?.email,
-//             token: jwt.sign({ email: profile?.email }, "myScret", {
-//                 expiresIn: "1d",
-//             }),
-//             },
-//         });
-//         }
-//     } catch (error) {
-//         res.status(500).json({
-//         message: "An error occured. Registration failed.",
-//         });
-//     }
-// })
-
 router.post("/login/google", async (req, res) => {
     try {
         if (req.body.credential) {
@@ -80,10 +44,15 @@ router.post("/login/google", async (req, res) => {
 
         if (!user) {
             try {
+                let pattern = /^(?=.*[0-9])(?=.*[!@#$%^&*.,])[a-zA-Z0-9!@#$%^&*.,]{10,12}$/;
+                let password = null;
+                while(!pattern.test(password)){
+                    password = new RandExp(pattern).gen()
+                }
                 await db.addUser({
                     email: profile.email,
                     username: profile.sub,
-                    password: '123',
+                    password: password,
                     displayName: profile.name,
                     age: null,
                     avatarUrl: profile.picture,
@@ -157,15 +126,6 @@ router.get("/register", async (req, res) => {
             active: 0
         });
 
-        // let clientId = getClientId(query);
-        // let token = await db.getToken(clientId, "clientId");
-
-        // if (!token) {
-        //     token = random();
-        // }
-
-        // await db.addToken(token, clientId, username);
-
         await sendConfirmationEmail({toUser: {email: query.email, username: username}, hash: null});
 
         sendData(res, "success");
@@ -232,14 +192,6 @@ router.get("/login", async (req, res) => {
         sendError(res, "Wrong password");
         return;
     }
-
-    // if(user.active === 0){
-    //     res.status(400).json({
-    //         success: false,
-    //         isActive: false
-    //     })
-    //     return;
-    // }
 
     token = await db.getToken(getClientId(query), "clientId");
 
@@ -317,33 +269,12 @@ router.get("/active_email", async (req, res) => {
 	}
 })
 
-// router.get("/reset", async (req, res) => {
-//     let query = req.query;
-
-//     let user = null;
-//     let username = getUsername(query);
-//     if (username) {
-//         user = await db.getUser(username);
-//     }
-//     else{
-//         sendError(res, "Cannot Reset password");
-//         return;
-//     }
-
-//     if(!user){
-//         sendError(res, "Error!");
-//         return;
-//     }
-
-//     sendData(res, "Email sent!");
-// });
 
 router.get("/resetPass", async (req, res) => {
     let query = req.query;
 
     let user = null;
     let username = getUsername(query);
-    // let password = req.query.password;
 
     if (username) {
         user = await db.getUser(username);
