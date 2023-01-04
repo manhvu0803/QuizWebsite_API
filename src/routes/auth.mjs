@@ -87,7 +87,7 @@ router.post("/login/google", async (req, res) => {
                     displayName: profile.name,
                     age: null,
                     avatarUrl: profile.picture,
-                    active: profile.email_verified ? 1 : 0
+                    active: 1
                 });
 
                 let token = await db.getToken(clientId, "clientId");
@@ -104,32 +104,21 @@ router.post("/login/google", async (req, res) => {
             }
         }
 
-        if(profile.email_verified)
-            sendData(res, {
-                accessToken: jwt.sign({
-                        name: profile.sub,
-                        email: profile.email,
-                        displayName: profile.name,
-                        age: null,
-                        avatar: profile.picture,
-                        clientId: clientId
-                    },
-                    process.env.JWT_SECRET,
-                    { expiresIn: "1d" }
-                )
-            });
-            return;
-            }
-        else{
-            await sendConfirmationEmail({toUser: {email: query.email, username: username}, hash: token});
+        sendData(res, {
+            accessToken: jwt.sign({
+                    name: profile.sub,
+                    email: profile.email,
+                    displayName: profile.name,
+                    age: null,
+                    avatar: profile.picture,
+                    clientId: clientId
+                },
+                process.env.JWT_SECRET,
+                { expiresIn: "1d" }
+            )
+        });
 
-            res.status(400).json({
-                success: false,
-                isActive: false
-            })
-            return;
-        }
-    } catch (error) {
+    }} catch (error) {
         res.status(500).json({
             message: error?.message || error,
         });
