@@ -28,7 +28,7 @@ router.get("/edit", async (req, res) => {
         password: query.password
     }
 
-    if (active !== 0) {
+    if (active === 0) {
         await sendConfirmationEmail({toUser: {email: query.email, username: user.username}, hash: null});
     }
 
